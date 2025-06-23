@@ -4,13 +4,110 @@ import '../models/product.dart';
 class ProductCard extends StatelessWidget {
   final Product product;
   final VoidCallback onTap;
+  final bool isHorizontal;
+  final double? cardHeight;
+  final double? imageHeight;
+  final bool showDiscountOverlay;
 
-  const ProductCard({required this.product, required this.onTap, super.key});
+  const ProductCard({
+    required this.product,
+    required this.onTap,
+    this.isHorizontal = false,
+    this.cardHeight,
+    this.imageHeight,
+    this.showDiscountOverlay = false,
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
+    if (isHorizontal) {
+      return SizedBox(
+        height: cardHeight ?? 260,
+        child: Card(
+          elevation: 5,
+          margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          child: InkWell(
+            onTap: onTap,
+            borderRadius: BorderRadius.circular(18),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.network(
+                          product.imageUrl,
+                          width: double.infinity,
+                          height: imageHeight ?? 100,
+                          fit: BoxFit.cover,
+                          errorBuilder: (c, e, s) => Container(
+                            height: imageHeight ?? 100,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.broken_image, size: 40),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    product.name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Text(
+                        'Rp ${product.price}',
+                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
+                      ),
+                      const Spacer(),
+                      Icon(Icons.star, color: Colors.amber, size: 14),
+                      Text('${product.rating ?? '-'}', style: const TextStyle(fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    product.category,
+                    style: const TextStyle(fontSize: 11, color: Colors.purple),
+                  ),
+                  const Spacer(),
+                  Row(
+                    children: [
+                      const Icon(Icons.storefront, size: 13, color: Colors.deepPurple),
+                      const SizedBox(width: 3),
+                      Expanded(
+                        child: Text(
+                          product.shopName ?? '-',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.deepPurple,
+                            fontWeight: FontWeight.w600,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Card vertical default (daftar semua menu)
     return Card(
-      elevation: 6,
+      elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
@@ -22,21 +119,51 @@ class ProductCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: Image.network(product.image, height: 72, width: 72, fit: BoxFit.cover),
+                child: Image.network(
+                  product.imageUrl,
+                  height: 72,
+                  width: 72,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 72,
+                    height: 72,
+                    color: Colors.grey[200],
+                    child: const Icon(Icons.broken_image, size: 28, color: Colors.grey),
+                  ),
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(product.title, maxLines: 2, overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                    const SizedBox(height: 8),
-                    Text('Rp ${product.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green)),
+                    Text(
+                      product.name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(product.shopName ?? '-', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    const SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        Text('${product.rating ?? '-'}', style: const TextStyle(fontSize: 13)),
+                        const SizedBox(width: 12),
+                        Text(product.category, style: const TextStyle(fontSize: 13, color: Colors.purple)),
+                      ],
+                    ),
                   ],
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey)
+              Column(
+                children: [
+                  Text('Rp ${product.price}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey),
+                ],
+              ),
             ],
           ),
         ),

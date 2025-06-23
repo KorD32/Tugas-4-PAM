@@ -29,9 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final provider = context.watch<ProductProvider>();
     final products = provider.products;
 
-    // Dummy split products jadi trending/promos
-    final trending = products.length > 4 ? products.sublist(0, 4) : products;
-    final promos = products.length > 8 ? products.sublist(4, 8) : products;
+    final trending = products.where((p) => p.isTrending).toList();
+    final promos = products.where((p) => p.isPromos).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
@@ -42,44 +41,44 @@ class _HomeScreenState extends State<HomeScreen> {
             const CategoryWidget(),
             const SectionTitleWidget(title: "Trending"),
             provider.loading
-              ? const Center(child: CircularProgressIndicator())
-              : HorizontalProductList(
-                  products: trending,
-                  onTap: (p) => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                ? const Center(child: CircularProgressIndicator())
+                : HorizontalProductList(
+                    products: trending,
+                    onTap: (p) => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                    ),
                   ),
-                ),
             const SectionTitleWidget(title: "Promos"),
             provider.loading
-              ? const Center(child: CircularProgressIndicator())
-              : HorizontalProductList(
-                  products: promos,
-                  onTap: (p) => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                ? const Center(child: CircularProgressIndicator())
+                : HorizontalProductList(
+                    products: promos,
+                    onTap: (p) => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                    ),
                   ),
-                ),
             const SizedBox(height: 24),
             const SectionTitleWidget(title: "Semua Menu"),
             provider.loading
-              ? const Center(child: CircularProgressIndicator())
-              : ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: products.length,
-                  itemBuilder: (_, i) => ProductCard(
-                    product: products[i],
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => DetailScreen(product: products[i]),
-                        ),
-                      );
-                    },
+                ? const Center(child: CircularProgressIndicator())
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: products.length,
+                    itemBuilder: (_, i) => ProductCard(
+                      product: products[i],
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => DetailScreen(product: products[i]),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
             const SizedBox(height: 32),
           ],
         ),
