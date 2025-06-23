@@ -7,6 +7,7 @@ import '../widgets/section_title_widget.dart';
 import '../widgets/horizontal_product_list.dart';
 import '../widgets/product_card.dart';
 import 'detail_screen.dart';
+import '../widgets/bottom_nav_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -46,7 +47,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     products: trending,
                     onTap: (p) => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                      MaterialPageRoute(
+                          builder: (_) => DetailScreen(product: p)),
                     ),
                   ),
             const SectionTitleWidget(title: "Promos"),
@@ -56,7 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     products: promos,
                     onTap: (p) => Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => DetailScreen(product: p)),
+                      MaterialPageRoute(
+                          builder: (_) => DetailScreen(product: p)),
                     ),
                   ),
             const SizedBox(height: 24),
@@ -83,20 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: const Color(0xFF9038FF),
-        unselectedItemColor: Colors.grey,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.explore), label: 'Explore'),
-          BottomNavigationBarItem(icon: Icon(Icons.history), label: 'History'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_basket), label: 'Basket'),
-          BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
-        ],
-        onTap: (idx) {
-          if (idx == 2) Navigator.pushNamed(context, '/cart');
-          if (idx == 3) Navigator.pushNamed(context, '/profile');
-        },
-      ),
+      bottomNavigationBar: const BottomNavWidget(),
     );
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/product.dart';
+import 'package:intl/intl.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -21,13 +22,20 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final formatRupiah = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
+
     if (isHorizontal) {
       return SizedBox(
         height: cardHeight ?? 260,
         child: Card(
           elevation: 5,
           margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 2),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
           child: InkWell(
             onTap: onTap,
             borderRadius: BorderRadius.circular(18),
@@ -60,21 +68,26 @@ class ProductCard extends StatelessWidget {
                     product.name,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                    style: const TextStyle(
+                        fontWeight: FontWeight.w500, fontSize: 14),
                   ),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(
-                        'Rp ${product.price}',
-                        style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
+                        formatRupiah.format(product.price),
+                        style: const TextStyle(
+                            color: Color.fromARGB(255, 0, 0, 0),
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16),
                       ),
                       const Spacer(),
                       Icon(Icons.star, color: Colors.amber, size: 14),
-                      Text('${product.rating ?? '-'}', style: const TextStyle(fontSize: 12)),
+                      Text('${product.rating ?? '-'}',
+                          style: const TextStyle(fontSize: 12)),
                     ],
                   ),
-                  const SizedBox(height: 2),
+                  const SizedBox(height: 3),
                   Text(
                     product.category,
                     style: const TextStyle(fontSize: 11, color: Colors.purple),
@@ -82,7 +95,8 @@ class ProductCard extends StatelessWidget {
                   const Spacer(),
                   Row(
                     children: [
-                      const Icon(Icons.storefront, size: 13, color: Colors.deepPurple),
+                      const Icon(Icons.storefront,
+                          size: 13, color: Colors.deepPurple),
                       const SizedBox(width: 3),
                       Expanded(
                         child: Text(
@@ -105,7 +119,6 @@ class ProductCard extends StatelessWidget {
       );
     }
 
-    // Card vertical default (daftar semua menu)
     return Card(
       elevation: 4,
       margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -128,7 +141,8 @@ class ProductCard extends StatelessWidget {
                     width: 72,
                     height: 72,
                     color: Colors.grey[200],
-                    child: const Icon(Icons.broken_image, size: 28, color: Colors.grey),
+                    child: const Icon(Icons.broken_image,
+                        size: 28, color: Colors.grey),
                   ),
                 ),
               ),
@@ -141,27 +155,42 @@ class ProductCard extends StatelessWidget {
                       product.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold, fontSize: 16),
                     ),
                     const SizedBox(height: 6),
-                    Text(product.shopName ?? '-', style: const TextStyle(fontSize: 13, color: Colors.grey)),
+                    Text(product.shopName ?? '-',
+                        style: const TextStyle(
+                            fontSize: 13,
+                            color: Color.fromARGB(255, 121, 121, 121))),
                     const SizedBox(height: 6),
                     Row(
                       children: [
                         Icon(Icons.star, color: Colors.amber, size: 16),
-                        Text('${product.rating ?? '-'}', style: const TextStyle(fontSize: 13)),
+                        Text('${product.rating ?? '-'}',
+                            style: const TextStyle(fontSize: 13)),
                         const SizedBox(width: 12),
-                        Text(product.category, style: const TextStyle(fontSize: 13, color: Colors.purple)),
+                        Text(product.category,
+                            style: const TextStyle(
+                                fontSize: 13, color: Colors.purple)),
                       ],
                     ),
                   ],
                 ),
               ),
-              Column(
+              Row(
                 children: [
-                  Text('Rp ${product.price}', style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                  Text(
+                    formatRupiah.format(product.price),
+                    style: const TextStyle(
+                        color: Color.fromARGB(255, 0, 0, 0),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14),
+                  ),
+                  SizedBox(width: 6),
                   const SizedBox(height: 8),
-                  Icon(Icons.arrow_forward_ios_rounded, size: 18, color: Colors.grey),
+                  Icon(Icons.arrow_forward_ios_rounded,
+                      size: 18, color: Colors.grey),
                 ],
               ),
             ],
