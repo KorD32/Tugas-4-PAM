@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
-import 'providers/menu_provider.dart';
+import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
 import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
@@ -39,7 +39,7 @@ WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => MenuProvider()),
+        ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
@@ -56,12 +56,11 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       initialRoute: '/login',
       routes: {
-        '/login': (_) => LoginScreen(),
-        '/register': (_) => RegisterScreen(),
-        '/home': (_) => HomeScreen(),
-        '/detail': (_) => DetailScreen(),
-        '/cart': (_) => CartScreen(),
-        '/profile': (_) => ProfileScreen(),
+          '/login': (_) => LoginScreen(),
+          '/register': (_) => RegisterScreen(),
+          '/home': (_) => HomeScreen(),
+          '/cart': (_) => CartScreen(),
+          '/profile': (_) => ProfileScreen(),
       },
     );
   }

@@ -1,47 +1,22 @@
 import 'package:flutter/material.dart';
-import '../models/food_item.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'dart:convert';
+import '../models/product.dart';
 
 class CartProvider extends ChangeNotifier {
-  static const String _cartKey = 'cart_items';
-  List<FoodItem> _cart = [];
+  final List<Product> _cart = [];
+  List<Product> get cart => _cart;
 
-  List<FoodItem> get cart => _cart;
-
-  CartProvider() {
-    loadCart();
-  }
-
-  Future<void> loadCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = prefs.getString(_cartKey) ?? '[]';
-    final List<dynamic> jsonList = json.decode(jsonString);
-    _cart = jsonList.map((item) => FoodItem.fromJson(item)).toList();
+  void addToCart(Product product) {
+    _cart.add(product);
     notifyListeners();
   }
 
-  Future<void> addToCart(FoodItem item) async {
-    _cart.add(item);
-    await _saveCart();
+  void removeFromCart(Product product) {
+    _cart.remove(product);
     notifyListeners();
   }
 
-  Future<void> removeFromCart(String id) async {
-    _cart.removeWhere((item) => item.id == id);
-    await _saveCart();
-    notifyListeners();
-  }
-
-  Future<void> clearCart() async {
+  void clearCart() {
     _cart.clear();
-    await _saveCart();
     notifyListeners();
-  }
-
-  Future<void> _saveCart() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonString = json.encode(_cart.map((item) => item.toJson()).toList());
-    await prefs.setString(_cartKey, jsonString);
   }
 }

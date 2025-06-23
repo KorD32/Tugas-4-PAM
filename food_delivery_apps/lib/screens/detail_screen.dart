@@ -1,36 +1,46 @@
-// lib/screens/detail_screen.dart
 import 'package:flutter/material.dart';
-import '../models/food_item.dart';
-// import provider/services untuk cart/order
+import 'package:provider/provider.dart';
+import '../models/product.dart';
+import '../providers/cart_provider.dart';
 
 class DetailScreen extends StatelessWidget {
+  final Product product;
+  const DetailScreen({required this.product, super.key});
+
   @override
   Widget build(BuildContext context) {
-    final FoodItem item = ModalRoute.of(context)!.settings.arguments as FoodItem;
-
     return Scaffold(
-      appBar: AppBar(title: Text(item.name)),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Image.network(item.imageUrl, height: 200, fit: BoxFit.cover),
-          SizedBox(height: 24),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(item.name, style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold)),
-          ),
-          Spacer(),
-          Padding(
-            padding: EdgeInsets.all(16),
-            child: ElevatedButton(
+      appBar: AppBar(title: Text(product.title)),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Image.network(product.image, height: 200, fit: BoxFit.contain),
+            const SizedBox(height: 16),
+            Text(product.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+            const SizedBox(height: 8),
+            Text('Rp ${product.price.toStringAsFixed(2)}', style: const TextStyle(color: Colors.green, fontSize: 18)),
+            const SizedBox(height: 16),
+            Text(product.description),
+            const Spacer(),
+            ElevatedButton.icon(
+              icon: const Icon(Icons.shopping_cart),
+              label: const Text('Tambah ke Cart'),
               onPressed: () {
-                // Panggil fungsi tambah ke cart / CRUD order lokal/cloud
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Ditambahkan ke cart/order!')));
+                context.read<CartProvider>().addToCart(product);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Ditambahkan ke Cart!')),
+                );
               },
-              child: Text('Pesan Sekarang'),
-            ),
-          )
-        ],
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                textStyle: const TextStyle(fontSize: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
