@@ -3,7 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/product.dart';
 
 class ApiService {
-  static const String url = 'https://mocki.io/v1/c6b62b7e-2696-4e1b-a9cf-73489700e39e';
+  static const String url =
+      'https://mocki.io/v1/c6b62b7e-2696-4e1b-a9cf-73489700e39e';
 
   Future<List<Product>> fetchProducts() async {
     final response = await http.get(Uri.parse(url));

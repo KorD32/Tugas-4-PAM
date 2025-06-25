@@ -7,23 +7,24 @@ class HorizontalProductList extends StatefulWidget {
   final List<Product> products;
   final void Function(Product) onTap;
 
-  const HorizontalProductList(
-      {required this.products, required this.onTap, super.key});
+  const HorizontalProductList({
+    required this.products,
+    required this.onTap,
+    super.key,
+  });
 
   @override
   State<HorizontalProductList> createState() => _HorizontalProductListState();
 }
 
 class _HorizontalProductListState extends State<HorizontalProductList> {
-  final controller = PageController(viewportFraction: 0.96);
-
+  final controller = PageController(viewportFraction: 1.0);
   @override
   Widget build(BuildContext context) {
     if (widget.products.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
     final pageCount = (widget.products.length / 2).ceil();
 
     return SizedBox(
@@ -37,32 +38,35 @@ class _HorizontalProductListState extends State<HorizontalProductList> {
               itemBuilder: (context, pageIndex) {
                 int first = pageIndex * 2;
                 int second = first + 1;
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      width: cardWidth,
-                      child: ProductCard(
-                        product: widget.products[first],
-                        onTap: () => widget.onTap(widget.products[first]),
-                        isHorizontal: true,
-                        cardHeight: 310,
-                        imageHeight: 160,
-                      ),
-                    ),
-                    const SizedBox(width: 15),
-                    if (second < widget.products.length)
-                      SizedBox(
-                        width: cardWidth,
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Expanded(
                         child: ProductCard(
-                          product: widget.products[second],
-                          onTap: () => widget.onTap(widget.products[second]),
+                          product: widget.products[first],
+                          onTap: () => widget.onTap(widget.products[first]),
                           isHorizontal: true,
                           cardHeight: 310,
                           imageHeight: 160,
                         ),
                       ),
-                  ],
+                      const SizedBox(width: 12),
+                      if (second < widget.products.length)
+                        Expanded(
+                          child: ProductCard(
+                            product: widget.products[second],
+                            onTap: () => widget.onTap(widget.products[second]),
+                            isHorizontal: true,
+                            cardHeight: 310,
+                            imageHeight: 160,
+                          ),
+                        )
+                      else
+                        const Spacer(),
+                    ],
+                  ),
                 );
               },
             ),

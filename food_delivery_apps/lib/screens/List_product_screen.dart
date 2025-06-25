@@ -141,25 +141,24 @@ class _ListProductScreenState extends State<ListProductScreen> {
 
     return categories.isEmpty
         ? const SizedBox.shrink()
-        : SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
-            child: Row(
+        : Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
               children: [
                 ChoiceChip(
                   label: const Text('Semua'),
                   selected: selected == null,
                   onSelected: (_) => provider.clearCategory(),
                 ),
-                const SizedBox(width: 8),
-                ...categories.map((cat) => Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        label: Text(cat),
-                        selected: selected == cat,
-                        onSelected: (_) => provider.setCategory(cat),
-                      ),
-                    )),
+                ...categories.map(
+                  (cat) => ChoiceChip(
+                    label: Text(cat),
+                    selected: selected == cat,
+                    onSelected: (_) => provider.setCategory(cat),
+                  ),
+                ),
               ],
             ),
           );

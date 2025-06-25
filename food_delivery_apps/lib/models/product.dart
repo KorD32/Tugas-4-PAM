@@ -24,15 +24,22 @@ class Product {
   });
 
   factory Product.fromJson(Map<String, dynamic> json) => Product(
-    id: json['id'],
-    name: json['name'],
-    category: json['category'],
-    description: json['description'],
-    imageUrl: json['image_url'],
-    price: json['price'],
-    rating: (json['rating'] as num?)?.toDouble(),
-    shopName: json['shop_name'],
-    isPromos: json['is_promos'],
-    isTrending: json['is_trending'],
-  );
+        id: json['id'],
+        name: json['name'],
+        category: json['category'],
+        description: json['description'],
+        imageUrl: json['image_url'],
+        price: json['price'],
+        rating: (json['rating'] as num?)?.toDouble(),
+        shopName: json['shop_name'],
+        isPromos: json['is_promos'],
+        isTrending: json['is_trending'],
+      );
+
+  int get finalPrice {
+    if (isPromos) {
+      return (price * 0.7).round();
+    }
+    return price;
+  }
 }

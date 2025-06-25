@@ -28,6 +28,10 @@ class ProductCard extends StatelessWidget {
       decimalDigits: 0,
     );
 
+    final originalPrice = product.price;
+    final finalPrice = product.finalPrice;
+    final hasPromo = product.isPromos;
+
     if (isHorizontal) {
       return SizedBox(
         height: cardHeight ?? 260,
@@ -74,15 +78,37 @@ class ProductCard extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Text(
-                        formatRupiah.format(product.price),
-                        style: const TextStyle(
-                            color: Color.fromARGB(255, 0, 0, 0),
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16),
-                      ),
+                      hasPromo
+                          ? Row(
+                              children: [
+                                Text(
+                                  formatRupiah.format(originalPrice),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  formatRupiah.format(finalPrice),
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              formatRupiah.format(finalPrice),
+                              style: const TextStyle(
+                                  color: Color.fromARGB(255, 0, 0, 0),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16),
+                            ),
                       const Spacer(),
-                      Icon(Icons.star, color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
                       Text('${product.rating ?? '-'}',
                           style: const TextStyle(fontSize: 12)),
                     ],
@@ -166,7 +192,7 @@ class ProductCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Icon(Icons.star, color: Colors.amber, size: 16),
+                        const Icon(Icons.star, color: Colors.amber, size: 16),
                         Text('${product.rating ?? '-'}',
                             style: const TextStyle(fontSize: 13)),
                         const SizedBox(width: 12),
@@ -178,19 +204,47 @@ class ProductCard extends StatelessWidget {
                   ],
                 ),
               ),
-              Row(
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text(
-                    formatRupiah.format(product.price),
-                    style: const TextStyle(
-                        color: Color.fromARGB(255, 0, 0, 0),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14),
-                  ),
-                  SizedBox(width: 6),
-                  const SizedBox(height: 8),
-                  Icon(Icons.arrow_forward_ios_rounded,
-                      size: 18, color: Colors.grey),
+                  Row(
+                    children: [
+                      hasPromo
+                          ? Column(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Text(
+                                  formatRupiah.format(originalPrice),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey,
+                                    decoration: TextDecoration.lineThrough,
+                                  ),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  formatRupiah.format(finalPrice),
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.red,
+                                  ),
+                                ),
+                              ],
+                            )
+                          : Text(
+                              formatRupiah.format(finalPrice),
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 0, 0, 0),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                      const SizedBox(width: 8),
+                      const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 18, color: Colors.grey),
+                    ],
+                  )
                 ],
               ),
             ],
