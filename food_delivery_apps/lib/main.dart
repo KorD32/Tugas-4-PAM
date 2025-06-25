@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:foodexpress/providers/category_provider.dart';
+import 'package:foodexpress/providers/checkout_provider.dart';
 import 'package:foodexpress/providers/search_provider_product.dart';
 import 'package:foodexpress/screens/List_product_screen.dart';
+import 'package:foodexpress/screens/history_screen.dart';
 import 'package:provider/provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
@@ -37,7 +39,8 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CartProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProductProvider())
+        ChangeNotifierProvider(create: (_) => SearchProductProvider()),
+        ChangeNotifierProvider(create: (_) => CheckoutProvider())
       ],
       child: MyApp(),
     ),
@@ -55,6 +58,7 @@ class MyApp extends StatelessWidget {
         '/login': (_) => LoginScreen(),
         '/register': (_) => RegisterScreen(),
         '/home': (_) => HomeScreen(),
+        '/history': (_) => HistoryScreen(),
         '/cart': (_) => CartScreen(),
         '/profile': (_) => ProfileScreen(),
         '/list': (_) => ListProductScreen(),

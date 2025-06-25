@@ -7,36 +7,70 @@ import '../widgets/bottom_nav_widget.dart';
 class CartScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final cart = context.watch<CartProvider>().cart;
-    final total = cart.fold<int>(0, (sum, item) => sum + item.price);
+    final cartProvider = context.watch<CartProvider>();
+    final cartItems = cartProvider.cart;
+    final total = cartProvider.getTotalPrice();
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cart'),
       ),
-      body: cart.isEmpty
+      body: cartItems.isEmpty
           ? const Center(child: Text('Cart masih kosong'))
           : Column(
               children: [
                 Expanded(
                   child: ListView.separated(
-                    itemCount: cart.length,
-                    separatorBuilder: (_, __) => Divider(height: 1),
+                    itemCount: cartItems.length,
+                    separatorBuilder: (_, __) => const Divider(height: 1),
                     itemBuilder: (_, i) {
-                      Product item = cart[i];
+                      final product = cartItems.keys.elementAt(i);
+                      final quantity = cartItems[product]!;
+
                       return ListTile(
                         leading: ClipRRect(
                           borderRadius: BorderRadius.circular(8),
-                          child: Image.network(item.imageUrl,
-                              width: 48, height: 48, fit: BoxFit.cover),
+                          child: Image.network(
+                            product.imageUrl,
+                            width: 48,
+                            height: 48,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                        title: Text(item.name,
-                            maxLines: 1, overflow: TextOverflow.ellipsis),
-                        subtitle: Text('Rp ${item.price.toStringAsFixed(0)}'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () =>
-                              context.read<CartProvider>().removeFromCart(item),
+                        title: Text(
+                          product.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        subtitle: Text(
+                          'Rp ${product.price} x $quantity',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.remove_circle_outline),
+                              onPressed: () {
+                                cartProvider.removeFromCart(product);
+                              },
+                            ),
+                            Text('$quantity',
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold)),
+                            IconButton(
+                              icon: const Icon(Icons.add_circle_outline),
+                              onPressed: () {
+                                cartProvider.addToCart(product);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                cartProvider.deleteItem(product);
+                              },
+                            ),
+                          ],
                         ),
                       );
                     },
@@ -54,11 +88,11 @@ class CartScreen extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Total:',
+                      const Text('Total:',
                           style: TextStyle(
                               fontSize: 16, fontWeight: FontWeight.bold)),
                       Text('Rp ${total.toStringAsFixed(0)}',
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 18,
                               color: Colors.green,
                               fontWeight: FontWeight.bold)),
