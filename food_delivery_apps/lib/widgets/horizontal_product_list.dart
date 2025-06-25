@@ -7,7 +7,8 @@ class HorizontalProductList extends StatefulWidget {
   final List<Product> products;
   final void Function(Product) onTap;
 
-  const HorizontalProductList({required this.products, required this.onTap, super.key});
+  const HorizontalProductList(
+      {required this.products, required this.onTap, super.key});
 
   @override
   State<HorizontalProductList> createState() => _HorizontalProductListState();
@@ -18,12 +19,10 @@ class _HorizontalProductListState extends State<HorizontalProductList> {
 
   @override
   Widget build(BuildContext context) {
-    // Jika data kosong, jangan render apa-apa (anti NaN)
     if (widget.products.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    // 2 card per page
     final cardWidth = (MediaQuery.of(context).size.width - 48) / 2;
     final pageCount = (widget.products.length / 2).ceil();
 
@@ -51,7 +50,7 @@ class _HorizontalProductListState extends State<HorizontalProductList> {
                         imageHeight: 160,
                       ),
                     ),
-                     const SizedBox(width: 15),
+                    const SizedBox(width: 15),
                     if (second < widget.products.length)
                       SizedBox(
                         width: cardWidth,

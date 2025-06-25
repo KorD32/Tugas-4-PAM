@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
@@ -17,12 +19,43 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  late PageController _adsController;
+  int _currentAdIndex = 0;
+  Timer? _adsTimer;
+  final List<String> adsImages = [
+    "assets/ads_1.png",
+    "assets/ads_2.png",
+    "assets/ads_3.png"
+  ];
+
   @override
   void initState() {
     super.initState();
+    _adsController = PageController();
+    _startAdsAutoScroll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProductProvider>(context, listen: false).fetchProducts();
     });
+  }
+
+  void _startAdsAutoScroll() {
+    _adsTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (_adsController.hasClients) {
+        _currentAdIndex = (_currentAdIndex + 1) % adsImages.length;
+        _adsController.animateToPage(
+          _currentAdIndex,
+          duration: const Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _adsController.dispose();
+    _adsTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -39,6 +72,20 @@ class _HomeScreenState extends State<HomeScreen> {
         child: ListView(
           children: [
             const HeaderWidget(),
+            SizedBox(
+                width: double.infinity,
+                height: 180,
+                child: PageView.builder(
+                  controller: _adsController,
+                  itemCount: adsImages.length,
+                  itemBuilder: (context, index) {
+                    return Image.asset(
+                      adsImages[index],
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                    );
+                  },
+                )),
             const CategoryWidget(),
             const SectionTitleWidget(title: "Trending"),
             provider.loading

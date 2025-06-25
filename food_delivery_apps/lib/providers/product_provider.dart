@@ -16,4 +16,12 @@ class ProductProvider extends ChangeNotifier {
     _loading = false;
     notifyListeners();
   }
+
+  List<Product> getByCategory(String? category) {
+    if (category == null || category == 'All') return _products;
+    return _products
+        .where((product) =>
+            product.category.toLowerCase() == category.toLowerCase())
+        .toList();
+  }
 }

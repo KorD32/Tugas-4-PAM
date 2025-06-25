@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import '../providers/category_provider.dart';
+import '../screens/list_product_screen.dart';
 
 class CategoryWidget extends StatelessWidget {
   const CategoryWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Daftar kategori lokal (statis) dengan icon
     final categories = [
       {'icon': Icons.fastfood, 'label': 'Fastfood'},
       {'icon': Icons.eco, 'label': 'Vegan'},
@@ -13,22 +18,40 @@ class CategoryWidget extends StatelessWidget {
     ];
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 10),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: categories.map((cat) {
-          return Column(
-            children: [
-              CircleAvatar(
-                radius: 28,
-                backgroundColor: Colors.white,
-                child: Icon(cat['icon'] as IconData,
-                    color: Color(0xFF9038FF), size: 30),
-              ),
-              const SizedBox(height: 8),
-              Text(cat['label'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.bold))
-            ],
+          final label = cat['label'] as String;
+          final icon = cat['icon'] as IconData;
+
+          return GestureDetector(
+            onTap: () {
+              context.read<CategoryProvider>().setCategory(label);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const ListProductScreen(),
+                ),
+              );
+            },
+            child: Column(
+              children: [
+                CircleAvatar(
+                  radius: 28,
+                  backgroundColor: Colors.white,
+                  child: Icon(icon, color: const Color(0xFF9038FF), size: 30),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
           );
         }).toList(),
       ),

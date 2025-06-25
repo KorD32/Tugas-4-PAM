@@ -33,7 +33,6 @@ class ProfileScreen extends StatelessWidget {
                   label: const Text('Logout'),
                   onPressed: () async {
                     await FirebaseAuth.instance.signOut();
-                    // ignore: use_build_context_synchronously
                     Navigator.pushReplacementNamed(context, '/login');
                   },
                 ),

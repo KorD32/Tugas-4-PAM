@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:foodexpress/providers/category_provider.dart';
 import 'package:foodexpress/providers/search_provider_product.dart';
 import 'package:foodexpress/screens/List_product_screen.dart';
 import 'package:provider/provider.dart';
@@ -9,7 +10,6 @@ import 'providers/auth_provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
-import 'screens/detail_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
@@ -35,6 +35,7 @@ void main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => ProductProvider()),
         ChangeNotifierProvider(create: (_) => CartProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => SearchProductProvider())
       ],
