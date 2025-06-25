@@ -22,10 +22,10 @@ class _ListProductScreenState extends State<ListProductScreen> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider =
+      final searchProvider =
           Provider.of<SearchProductProvider>(context, listen: false);
-      if (provider.products.isEmpty) {
-        provider.fetchProducts();
+      if (searchProvider.products.isEmpty) {
+        searchProvider.fetchProducts();
       }
     });
   }
@@ -47,18 +47,20 @@ class _ListProductScreenState extends State<ListProductScreen> {
       _isSearching = false;
       _searchController.clear();
     });
+
     Provider.of<SearchProductProvider>(context, listen: false).updateSearch('');
   }
 
-  void _onSubmitted(String value) {
+  void _onSearchChanged(String value) {
+    Provider.of<CategoryProvider>(context, listen: false).clearCategory();
     Provider.of<SearchProductProvider>(context, listen: false)
         .updateSearch(value.trim());
   }
 
   @override
   Widget build(BuildContext context) {
-    final searchProvider = Provider.of<SearchProductProvider>(context);
-    final categoryProvider = Provider.of<CategoryProvider>(context);
+    final searchProvider = context.watch<SearchProductProvider>();
+    final categoryProvider = context.watch<CategoryProvider>();
 
     final selectedCategory = categoryProvider.selectedCategory;
     final products = searchProvider.products;
@@ -73,8 +75,8 @@ class _ListProductScreenState extends State<ListProductScreen> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context).unfocus();
-        if (_isSearching) _stopSearch();
+        FocusScope.of(context)
+            .unfocus(); // ❗ hanya close keyboard, jangan reset
       },
       child: Scaffold(
         appBar: AppBar(
@@ -82,7 +84,7 @@ class _ListProductScreenState extends State<ListProductScreen> {
               ? TextField(
                   controller: _searchController,
                   autofocus: true,
-                  onSubmitted: _onSubmitted,
+                  onChanged: _onSearchChanged,
                   textInputAction: TextInputAction.search,
                   style: const TextStyle(color: Colors.black),
                   decoration: const InputDecoration(
@@ -141,24 +143,42 @@ class _ListProductScreenState extends State<ListProductScreen> {
 
     return categories.isEmpty
         ? const SizedBox.shrink()
-        : Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-            child: Wrap(
-              spacing: 8,
-              runSpacing: 8,
+        : SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+            child: Row(
               children: [
                 ChoiceChip(
                   label: const Text('Semua'),
                   selected: selected == null,
-                  onSelected: (_) => provider.clearCategory(),
+                  onSelected: (_) {
+                    provider.clearCategory();
+                    _searchController.clear();
+                    Provider.of<SearchProductProvider>(context, listen: false)
+                        .updateSearch('');
+                    setState(() {
+                      _isSearching = false;
+                    });
+                  },
                 ),
-                ...categories.map(
-                  (cat) => ChoiceChip(
-                    label: Text(cat),
-                    selected: selected == cat,
-                    onSelected: (_) => provider.setCategory(cat),
-                  ),
-                ),
+                const SizedBox(width: 8),
+                ...categories.map((cat) => Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: ChoiceChip(
+                        label: Text(cat),
+                        selected: selected == cat,
+                        onSelected: (_) {
+                          provider.setCategory(cat);
+                          _searchController.clear();
+                          Provider.of<SearchProductProvider>(context,
+                                  listen: false)
+                              .updateSearch('');
+                          setState(() {
+                            _isSearching = false;
+                          });
+                        },
+                      ),
+                    )),
               ],
             ),
           );

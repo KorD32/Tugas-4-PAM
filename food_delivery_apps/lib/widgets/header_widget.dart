@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/search_provider_product.dart';
+import '../providers/category_provider.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key});
@@ -12,12 +13,24 @@ class HeaderWidget extends StatefulWidget {
 class _HeaderWidgetState extends State<HeaderWidget> {
   final TextEditingController _controller = TextEditingController();
 
+  @override
+  void dispose() {
+    _controller.dispose(); // Hindari memory leak
+    super.dispose();
+  }
+
   void _onSubmit(String value) {
     final trimmed = value.trim();
-    if (trimmed.isNotEmpty) {
-      Provider.of<SearchProductProvider>(context, listen: false)
-          .updateSearch(trimmed);
+    if (trimmed.isEmpty) return;
 
+    final searchProvider = context.read<SearchProductProvider>();
+    final categoryProvider = context.read<CategoryProvider>();
+
+    categoryProvider.clearCategory();
+
+    searchProvider.updateSearch(trimmed);
+
+    if (mounted) {
       _controller.clear();
       Navigator.pushNamed(context, '/list');
     }
@@ -36,7 +49,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
         children: [
           Row(
             children: [
-              CircleAvatar(
+              const CircleAvatar(
                 radius: 22,
                 backgroundColor: Colors.white,
                 child: Icon(Icons.person, color: Color(0xFF9038FF), size: 28),
@@ -70,8 +83,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
                 ),
-                child: Row(
-                  children: const [
+                child: const Row(
+                  children: [
                     Icon(Icons.wallet, color: Color(0xFF9038FF), size: 18),
                     SizedBox(width: 5),
                     Text(
@@ -95,8 +108,8 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               filled: true,
               fillColor: Colors.white,
               hintText: 'Cari makanan atau resto...',
-              prefixIcon: Icon(Icons.search, color: Colors.grey),
-              contentPadding: EdgeInsets.all(0),
+              prefixIcon: const Icon(Icons.search, color: Colors.grey),
+              contentPadding: EdgeInsets.zero,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: BorderSide.none,

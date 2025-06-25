@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/category_provider.dart';
+import '../providers/search_provider_product.dart';
 import '../screens/list_product_screen.dart';
 
 class CategoryWidget extends StatelessWidget {
@@ -9,7 +10,6 @@ class CategoryWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Daftar kategori lokal (statis) dengan icon
     final categories = [
       {'icon': Icons.fastfood, 'label': 'Fastfood'},
       {'icon': Icons.eco, 'label': 'Vegan'},
@@ -27,11 +27,15 @@ class CategoryWidget extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
+              // ✅ Set kategori
               context.read<CategoryProvider>().setCategory(label);
+              // ✅ Reset pencarian
+              context.read<SearchProductProvider>().updateSearch('');
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const ListProductScreen(),
+                  builder: (_) => const ListProductScreen(),
                 ),
               );
             },

@@ -38,7 +38,7 @@ class Product {
 
   int get finalPrice {
     if (isPromos) {
-      return (price * 0.7).round();
+      return (price * 0.9).round();
     }
     return price;
   }

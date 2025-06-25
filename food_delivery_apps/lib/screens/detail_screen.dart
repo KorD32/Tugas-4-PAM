@@ -132,7 +132,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               child: const Icon(
                                 Icons.remove,
                                 color: Color(0xFF9038FF),
-                                size: 20,
+                                size: 14,
                               ),
                             ),
                           ),
@@ -161,7 +161,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               child: const Icon(
                                 Icons.add,
                                 color: Color(0xFF9038FF),
-                                size: 20,
+                                size: 14,
                               ),
                             ),
                           ),
@@ -185,7 +185,7 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               child: const Text(
                                 'Tambah ke Cart',
-                                style: TextStyle(color: Colors.black),
+                                style: TextStyle(color: Color(0xFF9038FF)),
                               ),
                               onPressed: () {
                                 for (int i = 0; i < quantity; i++) {
@@ -215,7 +215,8 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               child: const Text(
                                 'Checkout',
-                                style: TextStyle(color: Colors.black),
+                                style: TextStyle(
+                                    color: Color.fromARGB(255, 255, 255, 255)),
                               ),
                               onPressed: () {
                                 context.read<CheckoutProvider>().checkoutItem(
