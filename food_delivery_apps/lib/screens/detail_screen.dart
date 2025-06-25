@@ -61,7 +61,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                     Text(
                                       formatRupiah.format(product.price),
                                       style: const TextStyle(
-                                        fontSize: 16,
+                                        fontSize: 14,
                                         color: Colors.grey,
                                         decoration: TextDecoration.lineThrough,
                                       ),
