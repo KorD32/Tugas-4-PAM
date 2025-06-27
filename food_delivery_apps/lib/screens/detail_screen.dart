@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:foodexpress/providers/checkout_provider.dart';
+import 'package:foodexpress/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/product.dart';
@@ -219,19 +220,17 @@ class _DetailScreenState extends State<DetailScreen> {
                                     color: Color.fromARGB(255, 255, 255, 255)),
                               ),
                               onPressed: () {
-                                context.read<CheckoutProvider>().checkoutItem(
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CheckoutScreen(
                                       name: product.name,
-                                      price: product.finalPrice,
                                       imagePath: product.imageUrl,
+                                      price: product.finalPrice,
                                       quantity: quantity,
-                                    );
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        '${product.name} x$quantity telah di-checkout!'),
+                                    ),
                                   ),
                                 );
-                                Navigator.pushNamed(context, '/history');
                               },
                             ),
                           ),

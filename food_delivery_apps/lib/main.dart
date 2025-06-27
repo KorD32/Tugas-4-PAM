@@ -40,7 +40,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => SearchProductProvider()),
-        ChangeNotifierProvider(create: (_) => CheckoutProvider())
+        ChangeNotifierProvider(create: (_) => CheckoutProvider()),
       ],
       child: MyApp(),
     ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodexpress/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
@@ -75,29 +76,58 @@ class CartScreen extends StatelessWidget {
                     },
                   ),
                 ),
+
+                // Total dan Tombol Checkout
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                  padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
                       BoxShadow(color: Colors.grey.shade100, blurRadius: 8)
                     ],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text('Total:',
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Total:',
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold)),
+                          Text('Rp ${total.toStringAsFixed(0)}',
+                              style: const TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.green,
+                                  fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF9038FF),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                        ),
+                        onPressed: () {
+                          // Navigasi ke checkout dengan data cart
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => CheckoutScreen(
+                                cartItems: cartItems,
+                              ),
+                            ),
+                          );
+                        },
+                        child: const Text(
+                          'Checkout',
                           style: TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold)),
-                      Text('Rp ${total.toStringAsFixed(0)}',
-                          style: const TextStyle(
-                              fontSize: 18,
-                              color: Colors.green,
-                              fontWeight: FontWeight.bold)),
+                              color: Colors.white, fontWeight: FontWeight.bold),
+                        ),
+                      ),
                     ],
                   ),
-                )
+                ),
               ],
             ),
       bottomNavigationBar: const BottomNavWidget(),
