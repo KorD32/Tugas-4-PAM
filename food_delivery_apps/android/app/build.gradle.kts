@@ -9,7 +9,7 @@ plugins {
 android {
     namespace = "com.example.food_delivery_apps"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
+    // ndkVersion = flutter.ndkVersion  // Commented out to avoid NDK installation
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

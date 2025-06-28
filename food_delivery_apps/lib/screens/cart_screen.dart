@@ -4,6 +4,8 @@ import '../providers/cart_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
 
 class CartScreen extends StatelessWidget {
+  const CartScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
