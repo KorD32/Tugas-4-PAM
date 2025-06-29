@@ -7,7 +7,7 @@ plugins {
 }
 
 android {
-    namespace = "com.example.food_delivery_apps"
+    namespace = "com.kevin.foodexpress"
     compileSdk = flutter.compileSdkVersion
     // ndkVersion = flutter.ndkVersion  // Commented out to avoid NDK installation
 
@@ -22,10 +22,10 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "com.example.food_delivery_apps"
+        applicationId = "com.kevin.foodexpress"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        minSdk = 23  // Updated to support Firebase Auth
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
