@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:foodexpress/providers/checkout_provider.dart';
-import 'package:foodexpress/screens/checkout_screen.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
+import '../screens/checkout_screen.dart';
 
 class DetailScreen extends StatefulWidget {
   final Product product;
@@ -207,31 +206,32 @@ class _DetailScreenState extends State<DetailScreen> {
                           Expanded(
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF9038FF),
+                                backgroundColor: const Color(0xFF9038FF),
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                               ),
+                              onPressed: quantity > 0
+                                  ? () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CheckoutScreen(
+                                            name: product.name,
+                                            imagePath: product.imageUrl,
+                                            quantity: quantity,
+                                            price: product.finalPrice,
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  : null,
                               child: const Text(
                                 'Checkout',
-                                style: TextStyle(
-                                    color: Color.fromARGB(255, 255, 255, 255)),
+                                style: TextStyle(color: Colors.white),
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (_) => CheckoutScreen(
-                                      name: product.name,
-                                      imagePath: product.imageUrl,
-                                      price: product.finalPrice,
-                                      quantity: quantity,
-                                    ),
-                                  ),
-                                );
-                              },
                             ),
                           ),
                         ],

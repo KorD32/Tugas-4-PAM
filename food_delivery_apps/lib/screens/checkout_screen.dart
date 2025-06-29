@@ -5,7 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 
 class CheckoutScreen extends StatefulWidget {
-  final Map<Product, int>? cartItems; // Jika dari Cart
+  final Map<Product, int>? cartItems;
   final String? name;
   final String? imagePath;
   final int? quantity;
@@ -52,7 +52,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             if (isFromCart)
               Expanded(
                 child: ListView.builder(
-                  shrinkWrap: true,
                   itemCount: widget.cartItems!.length,
                   itemBuilder: (context, index) {
                     final entry = widget.cartItems!.entries.elementAt(index);
@@ -61,8 +60,12 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     return ListTile(
                       leading: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
-                        child: Image.network(product.imageUrl,
-                            width: 60, height: 60, fit: BoxFit.cover),
+                        child: Image.network(
+                          product.imageUrl,
+                          width: 60,
+                          height: 60,
+                          fit: BoxFit.cover,
+                        ),
                       ),
                       title: Text(product.name),
                       subtitle: Text('Jumlah: $qty'),
@@ -90,6 +93,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(widget.name!,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                         Text('Jumlah: ${widget.quantity}'),
@@ -118,49 +122,78 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 });
               },
             ),
-            const SizedBox(height: 24),
-            Text('Total: ${formatRupiah.format(total)}',
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const Spacer(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text("Total",
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Text(formatRupiah.format(total),
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            const SizedBox(height: 16),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF9038FF),
                 padding: const EdgeInsets.symmetric(vertical: 14),
               ),
-              onPressed: () {
-                final provider =
-                    Provider.of<CheckoutProvider>(context, listen: false);
-
-                if (isFromCart) {
-                  widget.cartItems!.forEach((product, qty) {
-                    provider.checkoutItem(
-                      name: product.name,
-                      image: product.imageUrl,
-                      quantity: qty,
-                      price: product.finalPrice,
-                    );
-                  });
-                } else {
-                  provider.checkoutItem(
-                    name: widget.name!,
-                    image: widget.imagePath!,
-                    quantity: widget.quantity!,
-                    price: widget.price!,
-                  );
-                }
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text('Pembayaran berhasil dengan $_selectedPayment'),
+              onPressed: () async {
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Konfirmasi Pembayaran'),
+                    content: const Text(
+                        'Apakah kamu yakin ingin melanjutkan pembayaran?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Tidak'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        child: const Text('Ya'),
+                      ),
+                    ],
                   ),
                 );
 
-                Navigator.pushNamed(context, '/history');
+                if (confirm == true) {
+                  final provider =
+                      Provider.of<CheckoutProvider>(context, listen: false);
+
+                  if (isFromCart) {
+                    widget.cartItems!.forEach((product, qty) {
+                      provider.checkoutItem(
+                        name: product.name,
+                        image: product.imageUrl,
+                        quantity: qty,
+                        price: product.finalPrice,
+                      );
+                    });
+                  } else {
+                    provider.checkoutItem(
+                      name: widget.name!,
+                      image: widget.imagePath!,
+                      quantity: widget.quantity!,
+                      price: widget.price!,
+                    );
+                  }
+
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Pembayaran berhasil dengan $_selectedPayment'),
+                    ),
+                  );
+
+                  Navigator.pop(context, true);
+                }
               },
               child: const Text(
-                'Konfirmasi & Bayar',
+                'Bayar',
                 style:
                     TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
               ),

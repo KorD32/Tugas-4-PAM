@@ -75,8 +75,7 @@ class _ListProductScreenState extends State<ListProductScreen> {
 
     return GestureDetector(
       onTap: () {
-        FocusScope.of(context)
-            .unfocus(); // ❗ hanya close keyboard, jangan reset
+        FocusScope.of(context).unfocus();
       },
       child: Scaffold(
         appBar: AppBar(

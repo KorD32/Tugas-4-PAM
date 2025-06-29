@@ -1,5 +1,7 @@
+// cart_screen.dart
 import 'package:flutter/material.dart';
 import 'package:foodexpress/screens/checkout_screen.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
@@ -11,7 +13,11 @@ class CartScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final cartProvider = context.watch<CartProvider>();
     final cartItems = cartProvider.cart;
+    final selectedItems = cartProvider.getSelectedCartItems();
     final total = cartProvider.getTotalPrice();
+
+    final formatrupiah =
+        NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,23 +36,41 @@ class CartScreen extends StatelessWidget {
                       final quantity = cartItems[product]!;
 
                       return ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.network(
-                            product.imageUrl,
-                            width: 48,
-                            height: 48,
-                            fit: BoxFit.cover,
-                          ),
+                        leading: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Checkbox(
+                              value:
+                                  cartProvider.selectedItems[product] ?? false,
+                              onChanged: (_) =>
+                                  cartProvider.toggleSelection(product),
+                            ),
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                product.imageUrl,
+                                width: 48,
+                                height: 48,
+                                fit: BoxFit.cover,
+                              ),
+                            ),
+                          ],
                         ),
                         title: Text(
                           product.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontWeight: FontWeight.w600),
                         ),
-                        subtitle: Text(
-                          'Rp ${product.price} x $quantity',
-                          style: const TextStyle(fontSize: 14),
+                        subtitle: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text("Jumlah: ${quantity}"),
+                            Text(
+                              formatrupiah.format(product.price),
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ],
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -78,8 +102,6 @@ class CartScreen extends StatelessWidget {
                     },
                   ),
                 ),
-
-                // Total dan Tombol Checkout
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -97,10 +119,10 @@ class CartScreen extends StatelessWidget {
                           const Text('Total:',
                               style: TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold)),
-                          Text('Rp ${total.toStringAsFixed(0)}',
+                          Text(formatrupiah.format(total),
                               style: const TextStyle(
                                   fontSize: 18,
-                                  color: Colors.green,
+                                  color: Colors.black,
                                   fontWeight: FontWeight.bold)),
                         ],
                       ),
@@ -110,17 +132,30 @@ class CartScreen extends StatelessWidget {
                           backgroundColor: const Color(0xFF9038FF),
                           padding: const EdgeInsets.symmetric(vertical: 14),
                         ),
-                        onPressed: () {
-                          // Navigasi ke checkout dengan data cart
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => CheckoutScreen(
-                                cartItems: cartItems,
-                              ),
-                            ),
-                          );
-                        },
+                        onPressed: selectedItems.isNotEmpty
+                            ? () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => CheckoutScreen(
+                                      cartItems: selectedItems,
+                                    ),
+                                  ),
+                                );
+
+                                // Hapus item terpilih setelah checkout sukses
+                                if (result == true) {
+                                  cartProvider.removeSelectedItems();
+                                }
+                              }
+                            : () {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                        'Pilih minimal 1 produk untuk checkout'),
+                                  ),
+                                );
+                              },
                         child: const Text(
                           'Checkout',
                           style: TextStyle(

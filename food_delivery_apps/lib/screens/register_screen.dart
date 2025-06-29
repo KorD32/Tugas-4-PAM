@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _usernameController = TextEditingController(); // Tambahan
   bool _loading = false;
   String? _error;
   bool _obscurePassword = true;
@@ -21,12 +22,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
       _error = null;
     });
     try {
-      await AuthService()
-          .register(_emailController.text, _passwordController.text);
+      await AuthService().register(
+        _emailController.text,
+        _passwordController.text,
+        _usernameController.text,
+      );
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       setState(() {
-        _error = 'Registrasi gagal';
+        _error = 'Registrasi gagal: ${e.toString()}';
       });
     }
     setState(() {
@@ -39,7 +43,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -49,86 +53,116 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     Container(
                       width: double.infinity,
                       height: 120,
-                      decoration: BoxDecoration(
-                          image: DecorationImage(
-                              image: AssetImage("assets/Logo.png"),
-                              fit: BoxFit.contain)),
+                      decoration: const BoxDecoration(
+                        image: DecorationImage(
+                          image: AssetImage("assets/Logo.png"),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
                     ),
-                    SizedBox(height: 32),
-                    Text('Daftar',
+                    const SizedBox(height: 32),
+                    const Text('Daftar',
                         style: TextStyle(
                             fontSize: 28, fontWeight: FontWeight.w700)),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Gmail",
-                          style: TextStyle(fontSize: 16),
-                        ),
-                        SizedBox(height: 5),
+                        const Text("Username", style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 5),
                         TextField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                                hintText: "Masukkan Email",
-                                contentPadding: EdgeInsets.symmetric(
-                                    vertical: 12, horizontal: 16),
-                                focusedBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Color(0xFF9038FF))),
-                                enabledBorder: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                    borderSide:
-                                        BorderSide(color: Colors.grey)))),
+                          controller: _usernameController,
+                          decoration: InputDecoration(
+                            hintText: "Masukkan Username",
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF9038FF)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          "Password",
-                          style: TextStyle(fontSize: 16),
+                        const Text("Gmail", style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 5),
+                        TextField(
+                          controller: _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                          decoration: InputDecoration(
+                            hintText: "Masukkan Email",
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF9038FF)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                          ),
                         ),
-                        SizedBox(height: 5),
+                      ],
+                    ),
+                    const SizedBox(height: 24),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Password", style: TextStyle(fontSize: 16)),
+                        const SizedBox(height: 5),
                         TextField(
                           controller: _passwordController,
                           obscureText: _obscurePassword,
                           decoration: InputDecoration(
-                              hintText: "Masukkan Password",
-                              contentPadding: EdgeInsets.symmetric(
-                                  vertical: 12, horizontal: 16),
-                              focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide:
-                                      BorderSide(color: Color(0xFF9038FF))),
-                              enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide(color: Colors.grey)),
-                              suffixIcon: IconButton(
-                                  icon: Icon(_obscurePassword
-                                      ? Icons.visibility_off
-                                      : Icons.visibility),
-                                  color: Colors.grey,
-                                  onPressed: () {
-                                    setState(() {
-                                      _obscurePassword = !_obscurePassword;
-                                    });
-                                  })),
+                            hintText: "Masukkan Password",
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 12, horizontal: 16),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide:
+                                  const BorderSide(color: Color(0xFF9038FF)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(color: Colors.grey),
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                color: Colors.grey,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _obscurePassword = !_obscurePassword;
+                                });
+                              },
+                            ),
+                          ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text("Sudah punya akun?"),
+                        const Text("Sudah punya akun?"),
                         TextButton(
                           onPressed: () =>
                               Navigator.pushNamed(context, '/login'),
-                          child: Text(
+                          child: const Text(
                             ' Login',
                             style: TextStyle(
                               fontWeight: FontWeight.w700,
@@ -140,26 +174,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ],
                     ),
-                    Spacer(),
+                    const Spacer(),
                     if (_error != null) ...[
-                      SizedBox(height: 8),
-                      Text(_error!, style: TextStyle(color: Colors.red)),
+                      const SizedBox(height: 8),
+                      Text(_error!, style: const TextStyle(color: Colors.red)),
                     ],
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     _loading
-                        ? CircularProgressIndicator()
+                        ? const CircularProgressIndicator()
                         : ElevatedButton(
                             onPressed: _register,
                             style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF9038FF),
-                                foregroundColor: Colors.white,
-                                minimumSize: Size(200, 50),
-                                shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12))),
-                            child: Text(
+                              backgroundColor: const Color(0xFF9038FF),
+                              foregroundColor: Colors.white,
+                              minimumSize: const Size(200, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            child: const Text(
                               'Register',
                               style: TextStyle(fontWeight: FontWeight.bold),
-                            )),
+                            ),
+                          ),
                   ],
                 ),
               ),

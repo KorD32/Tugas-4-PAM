@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/checkout_provider.dart';
 import 'package:intl/intl.dart';
+
+import '../providers/checkout_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -10,6 +11,12 @@ class HistoryScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final history = context.watch<CheckoutProvider>().history;
+
+    final formatRupiah = NumberFormat.currency(
+      locale: "id_ID",
+      symbol: "Rp ",
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -22,20 +29,94 @@ class HistoryScreen extends StatelessWidget {
             : null,
       ),
       body: history.isEmpty
-          ? const Center(child: Text('Belum ada transaksi'))
+          ? const Center(
+              child: Text(
+                'Belum ada transaksi',
+                style: TextStyle(fontSize: 16),
+              ),
+            )
           : ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: history.length,
               itemBuilder: (context, index) {
                 final item = history[index];
-                return ListTile(
-                  leading: Image.network(item.image, width: 50),
-                  title: Text('${item.quantity} x ${item.name}'),
-                  subtitle: Text(
-                    DateFormat('dd MMM yyyy HH:mm').format(item.dateTime),
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    border: Border.all(color: Colors.grey.shade300),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-                  trailing: Text(
-                    'Rp ${(item.price * item.quantity).toStringAsFixed(0)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: Image.network(
+                              item.image,
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.name,
+                                  style: const TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  'Jumlah: ${item.quantity}',
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                                Text(
+                                  formatRupiah.format(item.price),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Text(
+                                formatRupiah.format(item.price * item.quantity),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              SizedBox(
+                                height: 12,
+                              ),
+                              Text(
+                                DateFormat('HH:mm d/M/yyyy ')
+                                    .format(item.dateTime),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.black,
+                                ),
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    ],
                   ),
                 );
               },

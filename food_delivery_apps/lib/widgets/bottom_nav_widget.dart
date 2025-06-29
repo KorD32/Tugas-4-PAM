@@ -24,7 +24,6 @@ class BottomNavWidget extends StatelessWidget {
     final routes = ['/home', '/history', '/cart', '/profile'];
     final selectedRoute = routes[index];
 
-    // Hindari push ulang ke route yang sama
     if (ModalRoute.of(context)?.settings.name != selectedRoute) {
       Navigator.pushReplacementNamed(context, selectedRoute);
     }

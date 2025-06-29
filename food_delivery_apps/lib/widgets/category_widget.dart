@@ -27,9 +27,7 @@ class CategoryWidget extends StatelessWidget {
 
           return GestureDetector(
             onTap: () {
-              // ✅ Set kategori
               context.read<CategoryProvider>().setCategory(label);
-              // ✅ Reset pencarian
               context.read<SearchProductProvider>().updateSearch('');
 
               Navigator.push(
