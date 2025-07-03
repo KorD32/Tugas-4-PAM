@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/search_provider_product.dart';
 import '../providers/category_provider.dart';
+import '../providers/user_profile_provider.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key});
@@ -15,7 +16,7 @@ class _HeaderWidgetState extends State<HeaderWidget> {
 
   @override
   void dispose() {
-    _controller.dispose(); // Hindari memory leak
+    _controller.dispose();
     super.dispose();
   }
 
@@ -55,25 +56,33 @@ class _HeaderWidgetState extends State<HeaderWidget> {
                 child: Icon(Icons.person, color: Color(0xFF9038FF), size: 28),
               ),
               const SizedBox(width: 12),
-              const Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Selamat datang!',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    Text(
-                      'Temukan makanan favoritmu',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
+              Expanded(
+                child: Consumer<UserProfileProvider>(
+                  builder: (context, userProfile, child) {
+                    final username = userProfile.username.isNotEmpty 
+                        ? userProfile.username 
+                        : 'User';
+                    
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Selamat datang, $username!',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Text(
+                          'Temukan makanan favoritmu',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               Container(

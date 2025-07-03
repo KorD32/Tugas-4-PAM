@@ -17,13 +17,13 @@ class AuthProvider extends ChangeNotifier {
   String? get error => _error;
 
   Future<void> register(
-      String email, String password, String usernameInput) async {
+      String email, String password, String usernameInput, String namaLengkap, String noHandphone, String alamatPengiriman) async {
     _loading = true;
     _error = null;
     notifyListeners();
 
     try {
-      user = await _authService.register(email, password, usernameInput);
+      user = await _authService.register(email, password, usernameInput, namaLengkap, noHandphone, alamatPengiriman);
       username = usernameInput;
 
       await _firestore.collection('users').doc(user!.uid).set({

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class BottomNavWidget extends StatelessWidget {
   const BottomNavWidget({super.key});
 
-  // Fungsi bantu untuk menentukan halaman aktif berdasarkan route saat ini
+
   int _getSelectedIndex(BuildContext context) {
     final route = ModalRoute.of(context)?.settings.name;
     switch (route) {

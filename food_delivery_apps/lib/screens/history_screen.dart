@@ -5,12 +5,26 @@ import 'package:intl/intl.dart';
 import '../providers/checkout_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
 
-class HistoryScreen extends StatelessWidget {
+class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
 
   @override
+  State<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends State<HistoryScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CheckoutProvider>().listenToOrderHistory();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final history = context.watch<CheckoutProvider>().history;
+    final checkoutProvider = context.watch<CheckoutProvider>();
+    final orderHistory = checkoutProvider.orderHistory;
 
     final formatRupiah = NumberFormat.currency(
       locale: "id_ID",
@@ -28,7 +42,7 @@ class HistoryScreen extends StatelessWidget {
               )
             : null,
       ),
-      body: history.isEmpty
+      body: orderHistory.isEmpty
           ? const Center(
               child: Text(
                 'Belum ada transaksi',
@@ -37,9 +51,20 @@ class HistoryScreen extends StatelessWidget {
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: history.length,
+              itemCount: orderHistory.length,
               itemBuilder: (context, index) {
-                final item = history[index];
+                final order = orderHistory[index];
+                
+                List<Map<String, dynamic>> items = [];
+                final itemsData = order['items'];
+                if (itemsData is List) {
+                  for (var item in itemsData) {
+                    if (item is Map) {
+                      items.add(Map<String, dynamic>.from(item.cast<String, dynamic>()));
+                    }
+                  }
+                }
+                
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16),
                   padding: const EdgeInsets.all(12),
@@ -52,68 +77,115 @@ class HistoryScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              item.image,
-                              width: 60,
-                              height: 60,
-                              fit: BoxFit.cover,
+                          Text(
+                            'Order #${order['id']}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  item.name,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'Jumlah: ${item.quantity}',
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                                Text(
-                                  formatRupiah.format(item.price),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.black,
-                                  ),
-                                ),
-                              ],
+                          Text(
+                            DateFormat('dd/MM/yyyy HH:mm').format(
+                              DateTime.fromMillisecondsSinceEpoch(order['createdAt']),
+                            ),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
                             ),
                           ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                formatRupiah.format(item.price * item.quantity),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      
+                      Text(
+                        'Customer: ${order['customerName']}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      Text(
+                        'Payment: ${order['paymentMethod']}',
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      ...items.map((item) => Container(
+                        margin: const EdgeInsets.only(bottom: 8),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: Image.network(
+                                item['imageUrl'] ?? '',
+                                width: 50,
+                                height: 50,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    width: 50,
+                                    height: 50,
+                                    color: Colors.grey.shade300,
+                                    child: const Icon(Icons.image, color: Colors.grey),
+                                  );
+                                },
                               ),
-                              SizedBox(
-                                height: 12,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    item['name'] ?? 'Unknown Product',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Qty: ${item['quantity']} x ${formatRupiah.format(item['finalPrice'] ?? item['price'] ?? 0)}',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              Text(
-                                DateFormat('HH:mm d/M/yyyy ')
-                                    .format(item.dateTime),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.black,
-                                ),
+                            ),
+                            Text(
+                              formatRupiah.format((item['finalPrice'] ?? item['price'] ?? 0) * (item['quantity'] ?? 1)),
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
                               ),
-                            ],
-                          )
+                            ),
+                          ],
+                        ),
+                      )),
+                      
+                      const Divider(),
+                      
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            'Total',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            formatRupiah.format(order['totalAmount'] ?? 0),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
                         ],
                       ),
                     ],

@@ -1,11 +1,11 @@
 {
-    "name": "food_delivery_apps",
-    "short_name": "food_delivery_apps",
+    "name": "FoodExpress - Food Delivery App",
+    "short_name": "FoodExpress",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#9038FF",
+    "theme_color": "#9038FF",
+    "description": "Food delivery application built with Flutter",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

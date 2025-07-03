@@ -187,18 +187,20 @@ class _DetailScreenState extends State<DetailScreen> {
                                 'Tambah ke Cart',
                                 style: TextStyle(color: Color(0xFF9038FF)),
                               ),
-                              onPressed: () {
-                                for (int i = 0; i < quantity; i++) {
-                                  context
-                                      .read<CartProvider>()
-                                      .addToCart(product);
+                              onPressed: () async {
+                                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                await context
+                                    .read<CartProvider>()
+                                    .addToCartWithQuantity(product, quantity);
+                                
+                                if (mounted) {
+                                  scaffoldMessenger.showSnackBar(
+                                    SnackBar(
+                                      content: Text(
+                                          '${product.name} x$quantity ditambahkan ke cart!'),
+                                    ),
+                                  );
                                 }
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        '${product.name} x$quantity ditambahkan ke cart!'),
-                                  ),
-                                );
                               },
                             ),
                           ),
@@ -215,14 +217,26 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               onPressed: quantity > 0
                                   ? () {
+                                      // Create selectedItems map for single product checkout
+                                      final selectedItems = <int, Map<String, dynamic>>{
+                                        product.id: {
+                                          'productId': product.id,
+                                          'name': product.name,
+                                          'imageUrl': product.imageUrl,
+                                          'price': product.price,
+                                          'finalPrice': product.finalPrice,
+                                          'quantity': quantity,
+                                          'category': product.category,
+                                          'shopName': product.shopName ?? '',
+                                          'isPromos': product.isPromos,
+                                        }
+                                      };
+                                      
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) => CheckoutScreen(
-                                            name: product.name,
-                                            imagePath: product.imageUrl,
-                                            quantity: quantity,
-                                            price: product.finalPrice,
+                                            selectedItems: selectedItems,
                                           ),
                                         ),
                                       );

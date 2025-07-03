@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:foodexpress/providers/category_provider.dart';
 import 'package:foodexpress/providers/checkout_provider.dart';
 import 'package:foodexpress/providers/search_provider_product.dart';
+import 'package:foodexpress/providers/user_profile_provider.dart';
 import 'package:foodexpress/screens/List_product_screen.dart';
 import 'package:foodexpress/screens/history_screen.dart';
+import 'package:foodexpress/services/firebase_service.dart';
 import 'package:provider/provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
@@ -14,7 +17,6 @@ import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +25,7 @@ void main() async {
       options: const FirebaseOptions(
           apiKey: "AIzaSyBD_NgwsC2zuDU1r-ciZzKo7SsTKtDe4zM",
           authDomain: "foodexpress-5fe0a.firebaseapp.com",
+          databaseURL: "https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app/",
           projectId: "foodexpress-5fe0a",
           storageBucket: "foodexpress-5fe0a.firebasestorage.app",
           messagingSenderId: "403992588206",
@@ -32,6 +35,15 @@ void main() async {
   } else {
     await Firebase.initializeApp();
   }
+  
+
+  try {
+    await FirebaseService().initializeProducts();
+  } catch (e) {
+
+    debugPrint('gagal initialize produck: $e');
+  }
+  
   runApp(
     MultiProvider(
       providers: [
@@ -41,6 +53,7 @@ void main() async {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => SearchProductProvider()),
         ChangeNotifierProvider(create: (_) => CheckoutProvider()),
+        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
       ],
       child: MyApp(),
     ),

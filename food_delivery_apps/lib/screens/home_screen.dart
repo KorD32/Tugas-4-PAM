@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
+import '../providers/user_profile_provider.dart';
 import '../widgets/header_widget.dart';
 import '../widgets/category_widget.dart';
 import '../widgets/section_title_widget.dart';
@@ -35,6 +36,10 @@ class _HomeScreenState extends State<HomeScreen> {
     _startAdsAutoScroll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+      
+      // Load user profile for header greeting
+      final userProfile = Provider.of<UserProfileProvider>(context, listen: false);
+      userProfile.loadUserProfile();
     });
   }
 
