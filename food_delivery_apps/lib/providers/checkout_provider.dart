@@ -13,7 +13,7 @@ class CheckoutProvider with ChangeNotifier {
   List<Map<String, dynamic>> get orderHistory => _orderHistory;
   bool get loading => _loading;
 
-  // Load order history from Firebase
+  
   Future<void> loadOrderHistory() async {
     final userId = UserService.getCurrentUserId();
     if (userId == null) return;
@@ -33,12 +33,12 @@ class CheckoutProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Listen to real-time order history updates
+  
   void listenToOrderHistory() {
     final userId = UserService.getCurrentUserId();
     if (userId == null) return;
 
-    // Cancel previous subscription to prevent duplicates
+    
     _orderHistorySubscription?.cancel();
 
     _orderHistorySubscription = _userService.getOrderHistoryStream(userId).listen((orders) {
@@ -48,7 +48,7 @@ class CheckoutProvider with ChangeNotifier {
     });
   }
 
-  // Create checkout/order
+  
   Future<bool> createCheckout({
     required String customerName,
     required String customerPhone,
@@ -83,14 +83,14 @@ class CheckoutProvider with ChangeNotifier {
       notifyListeners();
       return true;
     } catch (e) {
-      debugPrint('Error creating checkout: $e');
+      debugPrint('gagal buat checkout: $e');
       _loading = false;
       notifyListeners();
       return false;
     }
   }
 
-  // Update order status
+  
   Future<void> updateOrderStatus({
     required String orderId,
     required String status,
@@ -105,11 +105,11 @@ class CheckoutProvider with ChangeNotifier {
         status: status,
       );
     } catch (e) {
-      debugPrint('Error updating order status: $e');
+      debugPrint('gagal update order status: $e');
     }
   }
 
-  // Get order by ID
+  
   Map<String, dynamic>? getOrderById(String orderId) {
     try {
       return _orderHistory.firstWhere((order) => order['id'] == orderId);
@@ -118,7 +118,7 @@ class CheckoutProvider with ChangeNotifier {
     }
   }
 
-  // Get total spent by user
+  
   int getTotalSpent() {
     int total = 0;
     for (var order in _orderHistory) {
@@ -127,10 +127,10 @@ class CheckoutProvider with ChangeNotifier {
     return total;
   }
 
-  // Get order count
+  
   int get orderCount => _orderHistory.length;
 
-  // Clear local history (for logout)
+  
   void clearHistory() {
     _orderHistory.clear();
     _orderHistorySubscription?.cancel();
@@ -143,12 +143,12 @@ class CheckoutProvider with ChangeNotifier {
     super.dispose();
   }
 
-  // Get orders by status
+  
   List<Map<String, dynamic>> getOrdersByStatus(String status) {
     return _orderHistory.where((order) => order['status'] == status).toList();
   }
 
-  // Get recent orders (last 10)
+  
   List<Map<String, dynamic>> getRecentOrders({int limit = 10}) {
     final sortedOrders = List<Map<String, dynamic>>.from(_orderHistory);
     sortedOrders.sort((a, b) => (b['createdAt'] as int).compareTo(a['createdAt'] as int));
