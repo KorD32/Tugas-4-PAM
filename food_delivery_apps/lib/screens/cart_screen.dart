@@ -18,9 +18,11 @@ class _CartScreenState extends State<CartScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cartProvider = context.read<CartProvider>();
-      cartProvider.loadCart().then((_) {
-        cartProvider.listenToCartUpdates();
-      });
+      if (!cartProvider.isInitialized) {
+        cartProvider.loadCart().then((_) {
+          cartProvider.listenToCartUpdates();
+        });
+      }
     });
   }
 

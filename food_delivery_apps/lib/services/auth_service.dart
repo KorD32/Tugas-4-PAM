@@ -13,35 +13,45 @@ class AuthService {
     String phone, 
     String address
   ) async {
-    final userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-
-    await userCredential.user?.updateDisplayName(username);
-    await userCredential.user?.reload();
-
-    // Create user profile in Realtime Database
-    if (userCredential.user != null) {
-      await _userService.createUserProfile(
-        userId: userCredential.user!.uid,
+    try {
+      final userCredential = await _auth.createUserWithEmailAndPassword(
         email: email,
-        username: username,
-        name: name,
-        phone: phone,
-        address: address,
-      );
-    }
+        password: password,
+      ).timeout(Duration(seconds: 10)); 
 
-    return _auth.currentUser;
+      if (userCredential.user != null) {
+        userCredential.user!.updateDisplayName(username).catchError((e) {
+          print('error update display name: $e');
+        });
+        
+        _userService.createUserProfile(
+          userId: userCredential.user!.uid,
+          email: email,
+          username: username,
+          name: name,
+          phone: phone,
+          address: address,
+        ).catchError((e) {
+          print('error buat user profile: $e');
+        });
+      }
+
+      return userCredential.user;
+    } catch (e) {
+      throw e;
+    }
   }
 
   Future<User?> login(String email, String password) async {
-    final userCredential = await _auth.signInWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    return userCredential.user;
+    try {
+      final userCredential = await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      ).timeout(Duration(seconds: 10)); 
+      return userCredential.user;
+    } catch (e) {
+      throw e;
+    }
   }
 
   Future<void> logout() async {
@@ -54,7 +64,7 @@ class AuthService {
     if (_auth.currentUser != null) {
       await _auth.currentUser!.updateDisplayName(displayName);
       
-      // Also update in Realtime Database
+      
       await _userService.updateUserProfile(
         userId: _auth.currentUser!.uid,
         username: displayName,

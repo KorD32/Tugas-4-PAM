@@ -7,10 +7,12 @@ class UserProfileProvider with ChangeNotifier {
   Map<String, dynamic>? _userProfile;
   final UserService _userService = UserService();
   bool _loading = false;
+  bool _initialized = false;
   StreamSubscription<Map<String, dynamic>?>? _profileSubscription;
 
   Map<String, dynamic>? get userProfile => _userProfile;
   bool get loading => _loading;
+  bool get isInitialized => _initialized;
 
   String get username => _userProfile?['username']?.toString() ?? '';
   String get name => _userProfile?['name']?.toString() ?? '';
@@ -19,16 +21,23 @@ class UserProfileProvider with ChangeNotifier {
   String get phone => _userProfile?['phone']?.toString() ?? '';
   String get address => _userProfile?['address']?.toString() ?? '';
 
-  // Load user profile from Firebase
+  
   Future<void> loadUserProfile() async {
     final userId = UserService.getCurrentUserId();
     if (userId == null) return;
+
+    if (_loading || (_initialized && _userProfile != null)) {
+      debugPrint('profile sudah diload atau sedang loading, skip');
+      return;
+    }
 
     _loading = true;
     notifyListeners();
 
     try {
-      _userProfile = await _userService.getUserProfile(userId);
+      _userProfile = await _userService.getUserProfile(userId)
+        .timeout(Duration(seconds: 5));
+      _initialized = true;
     } catch (e) {
       debugPrint('Error loading user profile: $e');
     }
@@ -37,12 +46,17 @@ class UserProfileProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Listen to real-time profile updates
+  Future<void> refreshProfile() async {
+    _initialized = false;
+    await loadUserProfile();
+  }
+
+  
   void listenToProfileUpdates() {
     final userId = UserService.getCurrentUserId();
     if (userId == null) return;
 
-    // Cancel previous subscription to prevent duplicates
+    
     _profileSubscription?.cancel();
 
     _profileSubscription = _userService.getUserProfileStream(userId).listen((profile) {
@@ -51,7 +65,7 @@ class UserProfileProvider with ChangeNotifier {
     });
   }
 
-  // Update user profile
+  
   Future<bool> updateProfile({
     String? username,
     String? name,
@@ -86,7 +100,7 @@ class UserProfileProvider with ChangeNotifier {
     }
   }
 
-  // Clear profile data (for logout)
+  
   void clearProfile() {
     _userProfile = null;
     _profileSubscription?.cancel();
@@ -99,7 +113,7 @@ class UserProfileProvider with ChangeNotifier {
     super.dispose();
   }
 
-  // Check if profile is complete
+  
   bool get isProfileComplete {
     if (_userProfile == null) return false;
     return _userProfile!['name']?.toString().isNotEmpty == true &&
@@ -107,17 +121,17 @@ class UserProfileProvider with ChangeNotifier {
            _userProfile!['address']?.toString().isNotEmpty == true;
   }
 
-  // Get profile completion percentage
+  
   double get profileCompletionPercentage {
     if (_userProfile == null) return 0.0;
     
     int completedFields = 0;
-    int totalFields = 5; // username, name, age, phone, address
+    int totalFields = 5; 
 
     if (_userProfile!['username']?.toString().isNotEmpty == true) completedFields++;
     if (_userProfile!['name']?.toString().isNotEmpty == true) completedFields++;
     
-    // Safe age checking
+    
     final ageValue = _userProfile!['age'];
     int ageInt = 0;
     if (ageValue is int) {

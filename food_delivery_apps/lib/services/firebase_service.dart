@@ -4,11 +4,44 @@ import '../models/product.dart';
 
 class FirebaseService {
   static final DatabaseReference _database = FirebaseDatabase.instance.ref();
+  
+  static bool _isOptimized = false;
+  
+  static List<Product>? _cachedProducts;
+  static DateTime? _lastCacheTime;
+  static const Duration _cacheTimeout = Duration(minutes: 5);
 
+
+  static void optimizeFirebase() {
+    if (!_isOptimized) {
+      try {
+        if (!kIsWeb) {
+          FirebaseDatabase.instance.setPersistenceEnabled(true);
+          FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10 * 1024 * 1024); //10mb
+          debugPrint('Firebase optimized for mobile');
+        } else {
+          debugPrint('Firebase optimized for web (limited features)');
+        }
+        _isOptimized = true;
+      } catch (e) {
+        debugPrint('Error optimizing Firebase: $e');
+        _isOptimized = true; 
+      }
+    }
+  }
 
   Future<List<Product>> fetchProducts() async {
     try {
-      final snapshot = await _database.child('products').get();
+      if (_cachedProducts != null && _lastCacheTime != null) {
+        final timeDiff = DateTime.now().difference(_lastCacheTime!);
+        if (timeDiff < _cacheTimeout) {
+          debugPrint('Menggunakan cached products');
+          return _cachedProducts!;
+        }
+      }
+      
+      final snapshot = await _database.child('products').get()
+        .timeout(Duration(seconds: 5)); 
       
       if (snapshot.exists) {
         final dynamic data = snapshot.value;
@@ -29,11 +62,19 @@ class FirebaseService {
         }
         
         products.sort((a, b) => a.id.compareTo(b.id));
+        
+        _cachedProducts = products;
+        _lastCacheTime = DateTime.now();
+        
         return products;
       }
       
       return [];
     } catch (e) {
+      if (_cachedProducts != null) {
+        debugPrint('pakai  cached products karena error: $e');
+        return _cachedProducts!;
+      }
       throw Exception('gagal load produk dari firebase: $e');
     }
   }
@@ -61,8 +102,13 @@ class FirebaseService {
 
   Future<void> initializeProducts() async {
     try {
+      if (_cachedProducts != null && _cachedProducts!.isNotEmpty) {
+        debugPrint('Products sudah ada di cache, skip initialization');
+        return;
+      }
 
-      final snapshot = await _database.child('products').get();
+      final snapshot = await _database.child('products').get()
+        .timeout(Duration(seconds: 3)); 
       if (snapshot.exists) {
         debugPrint('produk sudah ada di database');
         return;

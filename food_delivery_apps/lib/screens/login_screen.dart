@@ -23,7 +23,6 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       await AuthService()
           .login(_emailController.text, _passwordController.text);
-      // ignore: use_build_context_synchronously
       Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
       setState(() {

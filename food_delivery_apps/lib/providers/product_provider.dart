@@ -6,20 +6,30 @@ import '../services/firebase_service.dart';
 class ProductProvider extends ChangeNotifier {
   List<Product> _products = [];
   bool _loading = false;
+  bool _initialized = false;
   final FirebaseService _firebaseService = FirebaseService();
 
   List<Product> get products => _products;
   bool get loading => _loading;
+  bool get isInitialized => _initialized;
 
   Future<void> fetchProducts() async {
+    if (_loading) return; 
+    
+    if (_products.isNotEmpty && _initialized) {
+      debugPrint('Products sudah ada, skip fetch');
+      return;
+    }
+    
     _loading = true;
     notifyListeners();
     
     try {
       _products = await _firebaseService.fetchProducts();
+      _initialized = true;
     } catch (e) {
       debugPrint('Error fetching products: $e');
-      // If there's an error and no products exist, initialize the database
+      
       if (_products.isEmpty) {
         await initializeDatabase();
       }
@@ -27,6 +37,11 @@ class ProductProvider extends ChangeNotifier {
     
     _loading = false;
     notifyListeners();
+  }
+
+  Future<void> refreshProducts() async {
+    _initialized = false; 
+    await fetchProducts();
   }
 
   Future<void> initializeDatabase() async {
@@ -39,7 +54,7 @@ class ProductProvider extends ChangeNotifier {
     }
   }
 
-  // Real-time updates from Firebase
+  
   void listenToProducts() {
     _firebaseService.getProductsStream().listen((products) {
       _products = products;

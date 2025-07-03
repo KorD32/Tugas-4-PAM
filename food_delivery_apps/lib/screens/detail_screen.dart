@@ -217,7 +217,6 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               onPressed: quantity > 0
                                   ? () {
-                                      // Create selectedItems map for single product checkout
                                       final selectedItems = <int, Map<String, dynamic>>{
                                         product.id: {
                                           'productId': product.id,

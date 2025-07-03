@@ -13,12 +13,27 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  bool _isLoading = true;
+  
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<CheckoutProvider>().listenToOrderHistory();
-    });
+    _loadHistory();
+  }
+
+  Future<void> _loadHistory() async {
+    final checkoutProvider = context.read<CheckoutProvider>();
+    if (checkoutProvider.orderHistory.isEmpty) {
+      checkoutProvider.listenToOrderHistory();
+    }
+    
+    await Future.delayed(Duration(milliseconds: 500));
+    
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -42,12 +57,16 @@ class _HistoryScreenState extends State<HistoryScreen> {
               )
             : null,
       ),
-      body: orderHistory.isEmpty
+      body: _isLoading
           ? const Center(
-              child: Text(
-                'Belum ada transaksi',
-                style: TextStyle(fontSize: 16),
-              ),
+              child: CircularProgressIndicator(),
+            )
+          : orderHistory.isEmpty
+              ? const Center(
+                  child: Text(
+                    'Belum ada transaksi',
+                    style: TextStyle(fontSize: 16),
+                  ),
             )
           : ListView.builder(
               padding: const EdgeInsets.all(16),

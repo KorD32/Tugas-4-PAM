@@ -35,9 +35,11 @@ class _HomeScreenState extends State<HomeScreen> {
     _adsController = PageController();
     _startAdsAutoScroll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<ProductProvider>(context, listen: false).fetchProducts();
+      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      if (productProvider.products.isEmpty) {
+        productProvider.fetchProducts();
+      }
       
-      // Load user profile for header greeting
       final userProfile = Provider.of<UserProfileProvider>(context, listen: false);
       userProfile.loadUserProfile();
     });

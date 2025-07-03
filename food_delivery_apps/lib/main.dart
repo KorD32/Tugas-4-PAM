@@ -17,47 +17,74 @@ import 'screens/register_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/cart_screen.dart';
 import 'screens/profile_screen.dart';
+import 'screens/splash_screen.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  if (kIsWeb) {
-    await Firebase.initializeApp(
-      options: const FirebaseOptions(
-          apiKey: "AIzaSyBD_NgwsC2zuDU1r-ciZzKo7SsTKtDe4zM",
-          authDomain: "foodexpress-5fe0a.firebaseapp.com",
-          databaseURL: "https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app/",
-          projectId: "foodexpress-5fe0a",
-          storageBucket: "foodexpress-5fe0a.firebasestorage.app",
-          messagingSenderId: "403992588206",
-          appId: "1:403992588206:web:60f8e087c937541ccf623f",
-          measurementId: "G-M9ZHLPSBME"),
-    );
-  } else {
-    await Firebase.initializeApp();
-  }
-  
-
   try {
-    await FirebaseService().initializeProducts();
+    WidgetsFlutterBinding.ensureInitialized();
+    
+    if (kIsWeb) {
+      await Firebase.initializeApp(
+        options: const FirebaseOptions(
+            apiKey: "AIzaSyBD_NgwsC2zuDU1r-ciZzKo7SsTKtDe4zM",
+            authDomain: "foodexpress-5fe0a.firebaseapp.com",
+            databaseURL: "https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            projectId: "foodexpress-5fe0a",
+            storageBucket: "foodexpress-5fe0a.firebasestorage.app",
+            messagingSenderId: "403992588206",
+            appId: "1:403992588206:web:60f8e087c937541ccf623f",
+            measurementId: "G-M9ZHLPSBME"),
+      );
+    } else {
+      await Firebase.initializeApp();
+    }
+    
+    FirebaseService.optimizeFirebase();
+    
+    _initializeProductsInBackground();
+    
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProductProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => SearchProductProvider()),
+          ChangeNotifierProvider(create: (_) => CheckoutProvider()),
+          ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+        ],
+        child: MyApp(),
+      ),
+    );
   } catch (e) {
-
-    debugPrint('gagal initialize produck: $e');
+    debugPrint('Error in main: $e');
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider(create: (_) => ProductProvider()),
+          ChangeNotifierProvider(create: (_) => CartProvider()),
+          ChangeNotifierProvider(create: (_) => CategoryProvider()),
+          ChangeNotifierProvider(create: (_) => AuthProvider()),
+          ChangeNotifierProvider(create: (_) => SearchProductProvider()),
+          ChangeNotifierProvider(create: (_) => CheckoutProvider()),
+          ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+        ],
+        child: MyApp(),
+      ),
+    );
   }
-  
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => ProductProvider()),
-        ChangeNotifierProvider(create: (_) => CartProvider()),
-        ChangeNotifierProvider(create: (_) => CategoryProvider()),
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
-        ChangeNotifierProvider(create: (_) => SearchProductProvider()),
-        ChangeNotifierProvider(create: (_) => CheckoutProvider()),
-        ChangeNotifierProvider(create: (_) => UserProfileProvider()),
-      ],
-      child: MyApp(),
-    ),
-  );
+}
+
+void _initializeProductsInBackground() {
+  Future.microtask(() async {
+    try {
+      await FirebaseService().initializeProducts();
+      debugPrint('Products initialized successfully in background');
+    } catch (e) {
+      debugPrint('gagal initialize produck di background: $e');
+    }
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -68,8 +95,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FoodExpress',
       debugShowCheckedModeBanner: false,
-      initialRoute: '/login',
+      initialRoute: '/',
       routes: {
+        '/': (_) => SplashScreen(),
         '/login': (_) => LoginScreen(),
         '/register': (_) => RegisterScreen(),
         '/home': (_) => HomeScreen(),

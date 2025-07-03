@@ -27,7 +27,7 @@ class UserService {
         'address': address ?? '',
         'createdAt': DateTime.now().millisecondsSinceEpoch,
         'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      });
+      }).timeout(Duration(seconds: 5)); 
     } catch (e) {
       throw Exception('gagal buat user: $e');
     }
@@ -35,7 +35,8 @@ class UserService {
 
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
-      final snapshot = await _database.child('users').child(userId).get();
+      final snapshot = await _database.child('users').child(userId).get()
+        .timeout(Duration(seconds: 5)); 
       if (snapshot.exists && snapshot.value != null) {
         final dynamic data = snapshot.value;
         if (data is Map<dynamic, dynamic>) {

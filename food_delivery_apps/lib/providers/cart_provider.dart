@@ -8,11 +8,13 @@ class CartProvider with ChangeNotifier {
   final Map<int, bool> _selectedItems = {};
   final UserService _userService = UserService();
   bool _loading = false;
+  bool _initialized = false;
   StreamSubscription<List<Map<String, dynamic>>>? _cartSubscription;
 
   Map<int, Map<String, dynamic>> get cart => _cart;
   Map<int, bool> get selectedItems => _selectedItems;
   bool get loading => _loading;
+  bool get isInitialized => _initialized;
 
   
   Future<void> loadCart() async {
@@ -22,12 +24,18 @@ class CartProvider with ChangeNotifier {
       return;
     }
 
+    if (_loading || _initialized) {
+      debugPrint('Cart sudah diload atau sedang loading, skip');
+      return;
+    }
+
     debugPrint('load cart user dari: $userId');
     _loading = true;
     notifyListeners();
 
     try {
-      final cartItems = await _userService.getCartItems(userId);
+      final cartItems = await _userService.getCartItems(userId)
+        .timeout(Duration(seconds: 5));
       debugPrint('load ${cartItems.length} cart dari firebase');
       
       _cart.clear();
@@ -39,6 +47,7 @@ class CartProvider with ChangeNotifier {
         _selectedItems[productId] = true;
       }
       
+      _initialized = true;
       debugPrint('cart loaded berhasil: ${_cart.length} di cart');
     } catch (e) {
       debugPrint('gagal loading cart: $e');
@@ -46,6 +55,11 @@ class CartProvider with ChangeNotifier {
 
     _loading = false;
     notifyListeners();
+  }
+
+  Future<void> refreshCart() async {
+    _initialized = false;
+    await loadCart();
   }
 
   

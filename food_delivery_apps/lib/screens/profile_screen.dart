@@ -14,18 +14,33 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final user = FirebaseAuth.instance.currentUser;
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final userProfile = context.read<UserProfileProvider>();
-      final checkoutProvider = context.read<CheckoutProvider>();
-      
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final userProfile = context.read<UserProfileProvider>();
+    final checkoutProvider = context.read<CheckoutProvider>();
+    
+    if (userProfile.userProfile == null) {
       userProfile.loadUserProfile();
       userProfile.listenToProfileUpdates();
+    }
+    
+    if (checkoutProvider.orderHistory.isEmpty) {
       checkoutProvider.listenToOrderHistory();
-    });
+    }
+    await Future.delayed(Duration(milliseconds: 500));
+    
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   String _formatRupiah(int amount) {
@@ -214,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      // Progress bar untuk kelengkapan profil
+                      
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -257,7 +272,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                 const SizedBox(height: 24),
 
-                // Informasi profil
+                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -302,7 +317,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 24),
 
-                      // Statistik
+                      
                       Text(
                         'Statistik',
                         style: TextStyle(
@@ -337,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                       const SizedBox(height: 32),
 
-                      // Tombol logout
+                      
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -360,7 +375,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            // Tampilkan dialog konfirmasi
+                            
                             final shouldLogout = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(

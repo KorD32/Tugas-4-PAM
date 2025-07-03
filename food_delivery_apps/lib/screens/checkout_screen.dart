@@ -78,32 +78,32 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Order Summary
+                    
                     _buildSectionTitle('Order Summary'),
                     _buildOrderSummary(formatRupiah),
                     
                     const SizedBox(height: 24),
                     
-                    // Delivery Information (Read-only from profile)
+                    
                     _buildSectionTitle('Informasi Pengiriman'),
                     _buildDeliveryInfo(),
                     
                     const SizedBox(height: 24),
                     
-                    // Payment Method
+                    
                     _buildSectionTitle('Payment Method'),
                     _buildPaymentMethods(),
                     
                     const SizedBox(height: 24),
                     
-                    // Total
+                    
                     _buildTotalSection(formatRupiah, total),
                   ],
                 ),
               ),
             ),
             
-            // Checkout Button
+            
             _buildCheckoutButton(total),
           ],
         ),
@@ -195,7 +195,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildDeliveryInfo() {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, child) {
-        // Check if profile data is complete
+        
         bool isProfileComplete = userProfile.name.isNotEmpty && 
                                 userProfile.phone.isNotEmpty && 
                                 userProfile.address.isNotEmpty;
