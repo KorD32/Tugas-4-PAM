@@ -20,37 +20,46 @@ class CartProvider with ChangeNotifier {
   Future<void> loadCart() async {
     final userId = UserService.getCurrentUserId();
     if (userId == null) {
-      debugPrint('gagal load ke cart, tidak ada user ID');
+      debugPrint('Failed to load cart');
       return;
     }
 
-    if (_loading || _initialized) {
-      debugPrint('Cart sudah diload atau sedang loading, skip');
+    if (_loading) {
       return;
     }
 
-    debugPrint('load cart user dari: $userId');
+    debugPrint('Loading cart for user: $userId');
     _loading = true;
     notifyListeners();
 
     try {
       final cartItems = await _userService.getCartItems(userId)
-        .timeout(Duration(seconds: 5));
-      debugPrint('load ${cartItems.length} cart dari firebase');
+        .timeout(Duration(seconds: 10));
       
       _cart.clear();
       _selectedItems.clear();
 
       for (var item in cartItems) {
-        final productId = item['productId'] as int;
-        _cart[productId] = item;
-        _selectedItems[productId] = true;
+        final productIdValue = item['productId'];
+        int? productId;
+        
+        if (productIdValue is int) {
+          productId = productIdValue;
+        } else if (productIdValue is String) {
+          productId = int.tryParse(productIdValue);
+        }
+        
+        if (productId != null) {
+          _cart[productId] = item;
+          _selectedItems[productId] = false;
+        } else {
+        }
       }
       
       _initialized = true;
-      debugPrint('cart loaded berhasil: ${_cart.length} di cart');
+      debugPrint('${_cart.length} items in cart');
     } catch (e) {
-      debugPrint('gagal loading cart: $e');
+      debugPrint(' Error loading cart: $e');
     }
 
     _loading = false;
@@ -65,9 +74,10 @@ class CartProvider with ChangeNotifier {
   
   void listenToCartUpdates() {
     final userId = UserService.getCurrentUserId();
-    if (userId == null) return;
+    if (userId == null) {
+      return;
+    }
 
-    
     _cartSubscription?.cancel();
 
     _cartSubscription = _userService.getCartItemsStream(userId).listen((cartItems) {
@@ -75,9 +85,21 @@ class CartProvider with ChangeNotifier {
       _selectedItems.clear();
 
       for (var item in cartItems) {
-        final productId = item['productId'] as int;
-        _cart[productId] = item;
-        _selectedItems[productId] = true;
+        final productIdValue = item['productId'];
+        int? productId;
+        
+        if (productIdValue is int) {
+          productId = productIdValue;
+        } else if (productIdValue is String) {
+          productId = int.tryParse(productIdValue);
+        }
+        
+        if (productId != null) {
+          _cart[productId] = item;
+          _selectedItems[productId] = false;
+        } else {
+          debugPrint('invalid: $productIdValue');
+        }
       }
       
       notifyListeners();
@@ -107,7 +129,15 @@ class CartProvider with ChangeNotifier {
     try {
       final productId = product.id;
       if (_cart.containsKey(productId)) {
-        final currentQuantity = _cart[productId]!['quantity'] as int;
+        final quantityValue = _cart[productId]!['quantity'];
+        int currentQuantity = 0;
+        
+        if (quantityValue is int) {
+          currentQuantity = quantityValue;
+        } else if (quantityValue is String) {
+          currentQuantity = int.tryParse(quantityValue) ?? 0;
+        }
+        
         if (currentQuantity > 1) {
           await _userService.updateCartItemQuantity(
             userId: userId,
@@ -259,7 +289,16 @@ class CartProvider with ChangeNotifier {
   int get cartItemCount {
     int count = 0;
     _cart.forEach((productId, item) {
-      count += item['quantity'] as int;
+      final quantityValue = item['quantity'];
+      int quantity = 0;
+      
+      if (quantityValue is int) {
+        quantity = quantityValue;
+      } else if (quantityValue is String) {
+        quantity = int.tryParse(quantityValue) ?? 0;
+      }
+      
+      count += quantity;
     });
     return count;
   }
@@ -271,7 +310,17 @@ class CartProvider with ChangeNotifier {
 
   
   int getProductQuantity(int productId) {
-    return _cart[productId]?['quantity'] ?? 0;
+    final item = _cart[productId];
+    if (item == null) return 0;
+    
+    final quantityValue = item['quantity'];
+    if (quantityValue is int) {
+      return quantityValue;
+    } else if (quantityValue is String) {
+      return int.tryParse(quantityValue) ?? 0;
+    }
+    
+    return 0;
   }
 
   Future<void> addToCartWithQuantity(Product product, int quantity) async {
@@ -315,8 +364,33 @@ class CartProvider with ChangeNotifier {
   void clearCartData() {
     _cart.clear();
     _selectedItems.clear();
+    _initialized = false;
+    _loading = false;
     _cartSubscription?.cancel();
+    _cartSubscription = null;
     notifyListeners();
+    debugPrint('clear cart data');
+  }
+
+  
+  Future<void> incrementQuantity(int productId) async {
+    final currentQuantity = getProductQuantity(productId);
+    if (currentQuantity > 0) {
+      await updateQuantity(productId, currentQuantity + 1);
+    }
+  }
+  
+  Future<void> decrementQuantity(int productId) async {
+    final currentQuantity = getProductQuantity(productId);
+    if (currentQuantity > 1) {
+      await updateQuantity(productId, currentQuantity - 1);
+    } else if (currentQuantity == 1) {
+      await updateQuantity(productId, 0);
+    }
+  }
+  
+  Future<void> removeProductFromCart(int productId) async {
+    await updateQuantity(productId, 0);
   }
 
   @override

@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/firebase_service.dart';
+import 'user_profile_provider.dart';
+import 'cart_provider.dart';
+import 'checkout_provider.dart';
 
 class AuthProvider extends ChangeNotifier {
   final AuthService _authService = AuthService();
@@ -89,9 +94,43 @@ class AuthProvider extends ChangeNotifier {
   }
 
   Future<void> logout() async {
-    await _authService.logout();
-    user = null;
-    username = null;
+    _loading = true;
     notifyListeners();
+
+    try {
+      await _authService.logout();
+      user = null;
+      username = null;
+      _error = null;
+      debugPrint('User logged out');
+    } catch (e) {
+      _error = e.toString();
+      debugPrint('Logout error: $e');
+    }
+
+    _loading = false;
+    notifyListeners();
+  }
+
+  
+  static Future<void> logoutAndClearAllData(BuildContext context) async {
+    try {      
+      
+      final userProfileProvider = Provider.of<UserProfileProvider>(context, listen: false);
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      final checkoutProvider = Provider.of<CheckoutProvider>(context, listen: false);
+      
+      userProfileProvider.clearUserData();
+      cartProvider.clearCartData();
+      checkoutProvider.clearCheckoutData();
+      
+      
+      FirebaseService.clearCache();
+      
+      
+      await AuthService.clearAllUserData();
+      
+    } catch (e) {
+    }
   }
 }

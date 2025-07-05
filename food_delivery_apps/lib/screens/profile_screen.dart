@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:provider/provider.dart';
 import '../providers/user_profile_provider.dart';
 import '../providers/checkout_provider.dart';
+import '../providers/auth_provider.dart' as AppAuthProvider;
 import '../widgets/bottom_nav_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -400,7 +401,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             if (shouldLogout == true) {
                               final navigator = Navigator.of(context);
-                              await FirebaseAuth.instance.signOut();
+                              
+                              await AppAuthProvider.AuthProvider.logoutAndClearAllData(context);
+                              
                               if (!mounted) return;
                               navigator.pushReplacementNamed('/login');
                             }

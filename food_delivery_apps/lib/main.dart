@@ -79,10 +79,16 @@ void main() async {
 void _initializeProductsInBackground() {
   Future.microtask(() async {
     try {
+      final connected = await FirebaseService.testConnection();
+      if (!connected) {
+        debugPrint('gagal connect ke firebase');
+        return;
+      }
+      
       await FirebaseService().initializeProducts();
-      debugPrint('Products initialized successfully in background');
+      debugPrint('berhasil initialize produk di background');
     } catch (e) {
-      debugPrint('gagal initialize produck di background: $e');
+      debugPrint(' gagal initialize produck di background: $e');
     }
   });
 }

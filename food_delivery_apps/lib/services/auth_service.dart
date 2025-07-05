@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'user_service.dart';
 
 class AuthService {
@@ -56,6 +57,15 @@ class AuthService {
 
   Future<void> logout() async {
     await _auth.signOut();
+  }
+
+  static Future<void> clearAllUserData() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      debugPrint('user signed out successfully');
+    } catch (e) {
+      debugPrint('gagal logout: $e');
+    }
   }
 
   User? get currentUser => _auth.currentUser;

@@ -130,28 +130,12 @@ class CheckoutProvider with ChangeNotifier {
   
   int get orderCount => _orderHistory.length;
 
-  
-  void clearHistory() {
+  void clearCheckoutData() {
     _orderHistory.clear();
+    _loading = false;
     _orderHistorySubscription?.cancel();
+    _orderHistorySubscription = null;
     notifyListeners();
-  }
-
-  @override
-  void dispose() {
-    _orderHistorySubscription?.cancel();
-    super.dispose();
-  }
-
-  
-  List<Map<String, dynamic>> getOrdersByStatus(String status) {
-    return _orderHistory.where((order) => order['status'] == status).toList();
-  }
-
-  
-  List<Map<String, dynamic>> getRecentOrders({int limit = 10}) {
-    final sortedOrders = List<Map<String, dynamic>>.from(_orderHistory);
-    sortedOrders.sort((a, b) => (b['createdAt'] as int).compareTo(a['createdAt'] as int));
-    return sortedOrders.take(limit).toList();
+    debugPrint('clear checkout data');
   }
 }

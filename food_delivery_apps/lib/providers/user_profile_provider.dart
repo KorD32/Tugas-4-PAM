@@ -51,6 +51,15 @@ class UserProfileProvider with ChangeNotifier {
     await loadUserProfile();
   }
 
+  void clearUserData() {
+    _userProfile = null;
+    _initialized = false;
+    _loading = false;
+    _profileSubscription?.cancel();
+    _profileSubscription = null;
+    notifyListeners();
+  }
+
   
   void listenToProfileUpdates() {
     final userId = UserService.getCurrentUserId();

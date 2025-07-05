@@ -45,8 +45,23 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int _calculateTotal() {
     int total = 0;
     widget.selectedItems.forEach((productId, item) {
-      final price = item['finalPrice'] as int;
-      final quantity = item['quantity'] as int;
+      
+      final priceValue = item['finalPrice'];
+      int price = 0;
+      if (priceValue is int) {
+        price = priceValue;
+      } else if (priceValue is String) {
+        price = int.tryParse(priceValue) ?? 0;
+      }
+      
+      final quantityValue = item['quantity'];
+      int quantity = 0;
+      if (quantityValue is int) {
+        quantity = quantityValue;
+      } else if (quantityValue is String) {
+        quantity = int.tryParse(quantityValue) ?? 0;
+      }
+      
       total += price * quantity;
     });
     return total;

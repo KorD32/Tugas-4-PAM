@@ -89,7 +89,32 @@ class _CartScreenState extends State<CartScreen> {
                         itemBuilder: (_, i) {
                           final productId = cartItems.keys.elementAt(i);
                           final item = cartItems[productId]!;
-                          final quantity = item['quantity'] as int;
+                          
+                          
+                          final quantityValue = item['quantity'];
+                          int quantity = 0;
+                          if (quantityValue is int) {
+                            quantity = quantityValue;
+                          } else if (quantityValue is String) {
+                            quantity = int.tryParse(quantityValue) ?? 0;
+                          }
+                          
+                          
+                          final finalPriceValue = item['finalPrice'];
+                          int finalPrice = 0;
+                          if (finalPriceValue is int) {
+                            finalPrice = finalPriceValue;
+                          } else if (finalPriceValue is String) {
+                            finalPrice = int.tryParse(finalPriceValue) ?? 0;
+                          }
+                          
+                          final priceValue = item['price'];
+                          int price = 0;
+                          if (priceValue is int) {
+                            price = priceValue;
+                          } else if (priceValue is String) {
+                            price = int.tryParse(priceValue) ?? 0;
+                          }
 
                           return ListTile(
                             leading: Row(
@@ -102,7 +127,7 @@ class _CartScreenState extends State<CartScreen> {
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: Image.network(
-                                    item['imageUrl'] as String,
+                                    item['imageUrl']?.toString() ?? '',
                                     width: 48,
                                     height: 48,
                                     fit: BoxFit.cover,
@@ -119,7 +144,7 @@ class _CartScreenState extends State<CartScreen> {
                               ],
                             ),
                             title: Text(
-                              item['name'] as String,
+                              item['name']?.toString() ?? 'Unknown Product',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(fontWeight: FontWeight.w600),
@@ -129,12 +154,12 @@ class _CartScreenState extends State<CartScreen> {
                               children: [
                                 Text("Jumlah: $quantity"),
                                 Text(
-                                  formatrupiah.format(item['finalPrice'] as int),
+                                  formatrupiah.format(finalPrice),
                                   style: const TextStyle(fontSize: 14),
                                 ),
                                 if (item['isPromos'] == true)
                                   Text(
-                                    'Original: ${formatrupiah.format(item['price'] as int)}',
+                                    'Original: ${formatrupiah.format(price)}',
                                     style: const TextStyle(
                                       fontSize: 12,
                                       decoration: TextDecoration.lineThrough,
@@ -149,26 +174,25 @@ class _CartScreenState extends State<CartScreen> {
                                 IconButton(
                                   icon: const Icon(Icons.remove_circle_outline),
                                   onPressed: () {
-                                    if (quantity > 1) {
-                                      cartProvider.updateQuantity(productId, quantity - 1);
-                                    } else {
-                                      cartProvider.updateQuantity(productId, 0);
-                                    }
+                                    cartProvider.decrementQuantity(productId);
                                   },
+                                  tooltip: 'Kurangi quantity',
                                 ),
                                 Text('$quantity',
                                     style: const TextStyle(fontWeight: FontWeight.bold)),
                                 IconButton(
                                   icon: const Icon(Icons.add_circle_outline),
                                   onPressed: () {
-                                    cartProvider.updateQuantity(productId, quantity + 1);
+                                    cartProvider.incrementQuantity(productId);
                                   },
+                                  tooltip: 'Tambah quantity',
                                 ),
                                 IconButton(
                                   icon: const Icon(Icons.delete, color: Colors.red),
                                   onPressed: () {
-                                    cartProvider.updateQuantity(productId, 0);
+                                    cartProvider.removeProductFromCart(productId);
                                   },
+                                  tooltip: 'Hapus dari cart',
                                 ),
                               ],
                             ),
@@ -219,7 +243,9 @@ class _CartScreenState extends State<CartScreen> {
                                     );
 
                                     if (result == true) {
-                                      cartProvider.removeSelectedItems();
+                                      
+                                      
+                                      cartProvider.refreshCart();
                                     }
                                   }
                                 : () {
