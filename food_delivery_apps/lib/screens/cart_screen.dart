@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:foodexpress/screens/checkout_screen.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
+import '../widgets/network_status_widget.dart';
 
 class CartScreen extends StatefulWidget {
   const CartScreen({super.key});
@@ -45,6 +47,7 @@ class _CartScreenState extends State<CartScreen> {
       appBar: AppBar(
         title: const Text('Cart'),
         actions: [
+          const OfflineIndicator(),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
@@ -70,8 +73,6 @@ class _CartScreenState extends State<CartScreen> {
                             Icon(Icons.shopping_cart_outlined, size: 64, color: Colors.grey),
                             SizedBox(height: 16),
                             Text('Cart masih kosong', style: TextStyle(fontSize: 18, color: Colors.grey)),
-                            SizedBox(height: 8),
-                            Text('Pull to refresh', style: TextStyle(color: Colors.grey)),
                           ],
                         ),
                       ),
@@ -126,19 +127,25 @@ class _CartScreenState extends State<CartScreen> {
                                 ),
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
-                                  child: Image.network(
-                                    item['imageUrl']?.toString() ?? '',
+                                  child: CachedNetworkImage(
+                                    imageUrl: item['imageUrl']?.toString() ?? '',
                                     width: 48,
                                     height: 48,
                                     fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        width: 48,
-                                        height: 48,
-                                        color: Colors.grey[300],
-                                        child: const Icon(Icons.image_not_supported),
-                                      );
-                                    },
+                                    placeholder: (context, url) => Container(
+                                      width: 48,
+                                      height: 48,
+                                      color: Colors.grey[200],
+                                      child: const Center(
+                                        child: CircularProgressIndicator(strokeWidth: 2),
+                                      ),
+                                    ),
+                                    errorWidget: (context, url, error) => Container(
+                                      width: 48,
+                                      height: 48,
+                                      color: Colors.grey[300],
+                                      child: const Icon(Icons.image_not_supported),
+                                    ),
                                   ),
                                 ),
                               ],

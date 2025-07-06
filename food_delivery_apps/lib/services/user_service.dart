@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import '../models/product.dart';
 import '../models/checkout.dart';
+import 'offline_cache_service.dart';
 
 class UserService {
   static final DatabaseReference _database = FirebaseDatabase.instanceFor(
@@ -40,16 +41,46 @@ class UserService {
 
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
+      
+      final isOnline = await OfflineCacheService.isOnline();
+      
+      if (!isOnline) {
+        final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+        if (cachedProfile != null) {
+          return cachedProfile;
+        } else {
+          throw Exception('No internet dan cache');
+        }
+      }
+      
       final snapshot = await _database.child('users').child(userId).get()
         .timeout(Duration(seconds: 5)); 
+        
       if (snapshot.exists && snapshot.value != null) {
         final dynamic data = snapshot.value;
         if (data is Map<dynamic, dynamic>) {
-          return Map<String, dynamic>.from(data);
+          final profile = Map<String, dynamic>.from(data);
+          
+          await OfflineCacheService.cacheUserProfile(userId, profile);
+          
+          return profile;
         }
       }
+      
+      
+      final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+      if (cachedProfile != null) {
+        return cachedProfile;
+      }
+      
       return null;
     } catch (e) {
+      
+      final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+      if (cachedProfile != null) {
+        return cachedProfile;
+      }
+      
       throw Exception('gagal get user: $e');
     }
   }
@@ -202,6 +233,18 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getCartItems(String userId) async {
     try {
+
+      final isOnline = await OfflineCacheService.isOnline();
+      
+      if (!isOnline) {
+        final cachedCart = await OfflineCacheService.getCachedCart(userId);
+        if (cachedCart != null) {
+          final cartItems = cachedCart.values.toList();
+          return cartItems;
+        } else {
+          throw Exception('no internet dan cache');
+        }
+      }
       
       final cartSnapshot = await _database.child('carts').child(userId).get()
         .timeout(Duration(seconds: 10));
@@ -232,9 +275,16 @@ class UserService {
       final result = uniqueItems.values.toList();
       result.sort((a, b) => (_extractAddedAt(a)).compareTo(_extractAddedAt(b)));
       
+      await OfflineCacheService.cacheCart(userId, uniqueItems);
+      
       return result;
       
     } catch (e) {
+      final cachedCart = await OfflineCacheService.getCachedCart(userId);
+      if (cachedCart != null) {
+        final cartItems = cachedCart.values.toList();
+        return cartItems;
+      }
       throw Exception('gagal get cart: $e');
     }
   }
@@ -385,6 +435,19 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getOrderHistory(String userId) async {
     try {
+      
+      final isOnline = await OfflineCacheService.isOnline();
+      debugPrint('Online status: $isOnline');
+      
+      if (!isOnline) {
+        final cachedOrders = await OfflineCacheService.getCachedOrderHistory(userId);
+        if (cachedOrders != null) {
+          return cachedOrders;
+        } else {
+          throw Exception('no internet connection dan cache');
+        }
+      }
+      
       final snapshot = await _database.child('users').child(userId).child('orders').get();
       
       if (snapshot.exists && snapshot.value != null) {
@@ -399,13 +462,22 @@ class UserService {
           });
         }
         
-        
         orders.sort((a, b) => (b['createdAt'] as int? ?? 0).compareTo(a['createdAt'] as int? ?? 0));
+        
+        await OfflineCacheService.cacheOrderHistory(userId, orders);
+        
         return orders;
       }
       
+      await OfflineCacheService.cacheOrderHistory(userId, []);
       return [];
+      
     } catch (e) {
+      final cachedOrders = await OfflineCacheService.getCachedOrderHistory(userId);
+      if (cachedOrders != null) {
+        return cachedOrders;
+      }
+      
       throw Exception('gagal buat order history: $e');
     }
   }

@@ -36,6 +36,19 @@ class Product {
         isTrending: json['is_trending'],
       );
 
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'category': category,
+        'description': description,
+        'image_url': imageUrl,
+        'price': price,
+        'rating': rating,
+        'shop_name': shopName,
+        'is_promos': isPromos,
+        'is_trending': isTrending,
+      };
+
   int get finalPrice {
     if (isPromos) {
       return (price * 0.9).round();

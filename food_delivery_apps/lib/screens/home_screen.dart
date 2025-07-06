@@ -9,6 +9,7 @@ import '../widgets/category_widget.dart';
 import '../widgets/section_title_widget.dart';
 import '../widgets/horizontal_product_list.dart';
 import '../widgets/product_card.dart';
+import '../widgets/network_status_widget.dart';
 import 'detail_screen.dart';
 import '../widgets/bottom_nav_widget.dart';
 
@@ -76,8 +77,12 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       body: SafeArea(
-        child: ListView(
+        child: Column(
           children: [
+            const OfflineIndicator(),
+            Expanded(
+              child: ListView(
+                children: [
             const HeaderWidget(),
             SizedBox(
                 width: double.infinity,
@@ -136,7 +141,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       },
                     ),
                   ),
-            const SizedBox(height: 32),
+                  const SizedBox(height: 32),
+                ],
+              ),
+            ),
           ],
         ),
       ),

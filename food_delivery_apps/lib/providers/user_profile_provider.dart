@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'dart:async';
 import '../services/user_service.dart';
 
@@ -32,7 +33,10 @@ class UserProfileProvider with ChangeNotifier {
     }
 
     _loading = true;
-    notifyListeners();
+    
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
 
     try {
       _userProfile = await _userService.getUserProfile(userId)
@@ -43,7 +47,11 @@ class UserProfileProvider with ChangeNotifier {
     }
 
     _loading = false;
-    notifyListeners();
+    
+    
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      notifyListeners();
+    });
   }
 
   Future<void> refreshProfile() async {

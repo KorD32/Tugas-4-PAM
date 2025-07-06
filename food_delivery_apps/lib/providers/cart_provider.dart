@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'dart:async';
 import '../models/product.dart';
 import '../services/user_service.dart';
+import '../services/offline_cache_service.dart';
 
 class CartProvider with ChangeNotifier {
   final Map<int, Map<String, dynamic>> _cart = {};
@@ -361,15 +362,21 @@ class CartProvider with ChangeNotifier {
   }
 
   
-  void clearCartData() {
+  Future<void> clearCartData() async {
+    final userId = UserService.getCurrentUserId();
+    
     _cart.clear();
     _selectedItems.clear();
     _initialized = false;
     _loading = false;
     _cartSubscription?.cancel();
     _cartSubscription = null;
+    
+    if (userId != null) {
+      await OfflineCacheService.clearCartCache(userId);
+    }
+    
     notifyListeners();
-    debugPrint('clear cart data');
   }
 
   

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../models/product.dart';
 import '../providers/cart_provider.dart';
 import '../screens/checkout_screen.dart';
@@ -37,10 +38,22 @@ class _DetailScreenState extends State<DetailScreen> {
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(18),
-                        child: Image.network(
-                          product.imageUrl,
+                        child: CachedNetworkImage(
+                          imageUrl: product.imageUrl,
                           height: 280,
                           fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(
+                            height: 280,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                          errorWidget: (context, url, error) => Container(
+                            height: 280,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.broken_image, size: 60),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 18),

@@ -7,7 +7,9 @@ import 'package:foodexpress/providers/search_provider_product.dart';
 import 'package:foodexpress/providers/user_profile_provider.dart';
 import 'package:foodexpress/screens/List_product_screen.dart';
 import 'package:foodexpress/screens/history_screen.dart';
+import 'package:foodexpress/screens/cache_status_screen.dart';
 import 'package:foodexpress/services/firebase_service.dart';
+import 'package:foodexpress/services/offline_cache_service.dart';
 import 'package:provider/provider.dart';
 import 'providers/product_provider.dart';
 import 'providers/cart_provider.dart';
@@ -40,6 +42,9 @@ void main() async {
     }
     
     FirebaseService.optimizeFirebase();
+    
+    await OfflineCacheService.init();
+    debugPrint('cache service initialized');
     
     _initializeProductsInBackground();
     
@@ -111,6 +116,7 @@ class MyApp extends StatelessWidget {
         '/cart': (_) => CartScreen(),
         '/profile': (_) => ProfileScreen(),
         '/list': (_) => ListProductScreen(),
+        '/cache-status': (_) => const CacheStatusScreen(),
       },
     );
   }

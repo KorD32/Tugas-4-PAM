@@ -1,7 +1,8 @@
+import 'package:flutter/foundation.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/foundation.dart';
 import '../models/product.dart';
+import 'offline_cache_service.dart';
 
 class FirebaseService {
   static final DatabaseReference _database = FirebaseDatabase.instanceFor(
@@ -22,9 +23,9 @@ class FirebaseService {
         if (!kIsWeb) {
           FirebaseDatabase.instance.setPersistenceEnabled(true);
           FirebaseDatabase.instance.setPersistenceCacheSizeBytes(10 * 1024 * 1024); //10mb
-          debugPrint('Firebase optimized for mobile');
+          debugPrint('mobile');
         } else {
-          debugPrint('Firebase optimized for web');
+          debugPrint('web');
         }
         _isOptimized = true;
       } catch (e) {
@@ -36,48 +37,55 @@ class FirebaseService {
 
   Future<List<Product>> fetchProducts() async {
     try {
-      debugPrint('fetch database');
+      
+      final isOnline = await OfflineCacheService.isOnline();
+      
+      if (!isOnline) {
+        final cachedProducts = await OfflineCacheService.getCachedProducts();
+        if (cachedProducts != null) {
+          return cachedProducts;
+        } else {
+          debugPrint('tidak ada cache');
+          if (kIsWeb) {
+            return [];
+          }
+          throw Exception('tidak ada internet dan cache');
+        }
+      }
       
       if (_cachedProducts != null && _lastCacheTime != null) {
         final timeDiff = DateTime.now().difference(_lastCacheTime!);
         if (timeDiff < _cacheTimeout) {
-          debugPrint('cache product (${_cachedProducts!.length} items)');
           return _cachedProducts!;
         }
-        debugPrint('cache expired');
       }
       
-      debugPrint('connecting to db');
+      debugPrint('connecting firebase');
       final snapshot = await _database.child('products').get()
         .timeout(Duration(seconds: 10)); 
       
-      debugPrint('snapshot data ${snapshot.exists}');
       
       if (snapshot.exists) {
         final dynamic data = snapshot.value;
         List<Product> products = [];
         
-        debugPrint('prosessing data ${data.runtimeType}');
         
         if (data is Map<dynamic, dynamic>) {
-          debugPrint('mapping data ${data.length} enter');
           data.forEach((key, value) {
             if (value is Map<dynamic, dynamic>) {
               try {
                 products.add(Product.fromJson(Map<String, dynamic>.from(value)));
               } catch (e) {
-                debugPrint('error parsing produk $key: $e');
+                debugPrint('error parsing product $key: $e');
               }
             }
           });
         } else if (data is List<dynamic>) {
-          debugPrint('prossesing data ${data.length}');
           for (int i = 0; i < data.length; i++) {
             if (data[i] != null && data[i] is Map<dynamic, dynamic>) {
               try {
                 products.add(Product.fromJson(Map<String, dynamic>.from(data[i])));
               } catch (e) {
-                debugPrint('error parsing produk $i: $e');
               }
             }
           }
@@ -87,20 +95,35 @@ class FirebaseService {
         
         _cachedProducts = products;
         _lastCacheTime = DateTime.now();
+        await OfflineCacheService.cacheProducts(products);
         
-        debugPrint('berhasil load ${products.length} produk');
         return products;
       }
       
-      debugPrint('tidak ada data ditemukan di db');
+      
+      final cachedProducts = await OfflineCacheService.getCachedProducts();
+      if (cachedProducts != null) {
+        return cachedProducts;
+      }
+      
       return [];
     } catch (e) {
-      debugPrint('error fetching data $e');
+      
+      final cachedProducts = await OfflineCacheService.getCachedProducts();
+      if (cachedProducts != null) {
+        return cachedProducts;
+      }
+      
       if (_cachedProducts != null) {
-        debugPrint('cached data (${_cachedProducts!.length} items)');
         return _cachedProducts!;
       }
-      throw Exception('gagal load produk dari firebase: $e');
+      
+      if (kIsWeb) {
+        debugPrint('web mode: empty');
+        return [];
+      }
+      
+      throw Exception('$e');
     }
   }
 
@@ -128,7 +151,7 @@ class FirebaseService {
   Future<void> initializeProducts() async {
     try {
       if (_cachedProducts != null && _cachedProducts!.isNotEmpty) {
-        debugPrint('Products sudah ada di cache, skip initialization');
+        debugPrint('produk sudah ada di cache, skip initialization');
         return;
       }
 
@@ -146,7 +169,6 @@ class FirebaseService {
           "name": "Beef Burger Premium",
           "category": "fastfood",
           "description": "Beef patty with fresh lettuce, tomato, and cheese in a soft sesame bun.",
-          "image_url": "https://images.unsplash.com/photo-1550547660-d9450f859349?auto=format&fit=crop&w=400&q=80",
           "price": 35000,
           "rating": 4.7,
           "shop_name": "Burger Bros",

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 import '../providers/checkout_provider.dart';
 import '../widgets/bottom_nav_widget.dart';
+import '../widgets/network_status_widget.dart';
 
 class HistoryScreen extends StatefulWidget {
   const HistoryScreen({super.key});
@@ -23,9 +25,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
 
   Future<void> _loadHistory() async {
     final checkoutProvider = context.read<CheckoutProvider>();
-    if (checkoutProvider.orderHistory.isEmpty) {
-      checkoutProvider.listenToOrderHistory();
-    }
+    
+    
+    await checkoutProvider.loadOrderHistory();
+    
+    
+    checkoutProvider.listenToOrderHistory();
     
     await Future.delayed(Duration(milliseconds: 500));
     
@@ -56,6 +61,9 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 onPressed: () => Navigator.pop(context),
               )
             : null,
+        actions: [
+          const OfflineIndicator(),
+        ],
       ),
       body: _isLoading
           ? const Center(
@@ -136,19 +144,25 @@ class _HistoryScreenState extends State<HistoryScreen> {
                           children: [
                             ClipRRect(
                               borderRadius: BorderRadius.circular(6),
-                              child: Image.network(
-                                item['imageUrl'] ?? '',
+                              child: CachedNetworkImage(
+                                imageUrl: item['imageUrl'] ?? '',
                                 width: 50,
                                 height: 50,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return Container(
-                                    width: 50,
-                                    height: 50,
-                                    color: Colors.grey.shade300,
-                                    child: const Icon(Icons.image, color: Colors.grey),
-                                  );
-                                },
+                                placeholder: (context, url) => Container(
+                                  width: 50,
+                                  height: 50,
+                                  color: Colors.grey[200],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  ),
+                                ),
+                                errorWidget: (context, url, error) => Container(
+                                  width: 50,
+                                  height: 50,
+                                  color: Colors.grey.shade300,
+                                  child: const Icon(Icons.image, color: Colors.grey),
+                                ),
                               ),
                             ),
                             const SizedBox(width: 10),

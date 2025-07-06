@@ -5,6 +5,7 @@ import '../providers/user_profile_provider.dart';
 import '../providers/checkout_provider.dart';
 import '../providers/auth_provider.dart' as AppAuthProvider;
 import '../widgets/bottom_nav_widget.dart';
+import '../widgets/network_status_widget.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -20,7 +21,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     super.initState();
-    _loadProfile();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadProfile();
+    });
   }
 
   Future<void> _loadProfile() async {
@@ -169,6 +172,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
         foregroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        actions: [
+          const OfflineIndicator(),
+        ],
       ),
       body: Consumer<UserProfileProvider>(
         builder: (context, userProfile, child) {
@@ -352,6 +358,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
 
                       const SizedBox(height: 32),
+
+                      
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue[50],
+                            foregroundColor: Colors.blue,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                              side: BorderSide(color: Colors.blue.shade200),
+                            ),
+                            elevation: 0,
+                          ),
+                          icon: const Icon(Icons.storage_rounded),
+                          label: const Text(
+                            'Cache Status',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/cache-status');
+                          },
+                        ),
+                      ),
+
+                      const SizedBox(height: 16),
 
                       
                       SizedBox(
