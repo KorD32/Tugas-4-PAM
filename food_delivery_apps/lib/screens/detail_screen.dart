@@ -201,11 +201,12 @@ class _DetailScreenState extends State<DetailScreen> {
                                 style: TextStyle(color: Color(0xFF9038FF)),
                               ),
                               onPressed: () async {
-                                final scaffoldMessenger = ScaffoldMessenger.of(context);
+                                final scaffoldMessenger =
+                                    ScaffoldMessenger.of(context);
                                 await context
                                     .read<CartProvider>()
                                     .addToCartWithQuantity(product, quantity);
-                                
+
                                 if (mounted) {
                                   scaffoldMessenger.showSnackBar(
                                     SnackBar(
@@ -230,7 +231,8 @@ class _DetailScreenState extends State<DetailScreen> {
                               ),
                               onPressed: quantity > 0
                                   ? () {
-                                      final selectedItems = <int, Map<String, dynamic>>{
+                                      final selectedItems =
+                                          <int, Map<String, dynamic>>{
                                         product.id: {
                                           'productId': product.id,
                                           'name': product.name,
@@ -243,7 +245,7 @@ class _DetailScreenState extends State<DetailScreen> {
                                           'isPromos': product.isPromos,
                                         }
                                       };
-                                      
+
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(

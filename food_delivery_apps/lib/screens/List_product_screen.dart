@@ -3,9 +3,10 @@ import 'package:provider/provider.dart';
 
 import '../providers/search_provider_product.dart';
 import '../providers/category_provider.dart';
+import '../providers/meal_provider.dart';
 import '../widgets/product_card.dart';
 import '../widgets/bottom_nav_widget.dart';
-import 'detail_screen.dart';
+import '../models/meal.dart';
 
 class ListProductScreen extends StatefulWidget {
   const ListProductScreen({super.key});
@@ -51,19 +52,36 @@ class _ListProductScreenState extends State<ListProductScreen> {
     Provider.of<SearchProductProvider>(context, listen: false).updateSearch('');
   }
 
-  void _onSearchChanged(String value) {
-    Provider.of<CategoryProvider>(context, listen: false).clearCategory();
-    Provider.of<SearchProductProvider>(context, listen: false)
-        .updateSearch(value.trim());
+  void _onSearchChanged(String value) async {
+    final trimmed = value.trim();
+    final searchProvider =
+        Provider.of<SearchProductProvider>(context, listen: false);
+    final mealProvider = Provider.of<MealProvider>(context, listen: false);
+    final categoryProvider =
+        Provider.of<CategoryProvider>(context, listen: false);
+
+    categoryProvider.clearCategory();
+    searchProvider.updateSearch(trimmed);
+    await searchProvider.fetchProducts();
+
+    if (searchProvider.products.isEmpty) {
+      await mealProvider.fetchMealsByName(trimmed);
+    } else {
+      mealProvider.clearMeals();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final searchProvider = context.watch<SearchProductProvider>();
     final categoryProvider = context.watch<CategoryProvider>();
+    final mealProvider = context.watch<MealProvider>();
 
     final selectedCategory = categoryProvider.selectedCategory;
+
     final products = searchProvider.products;
+
+    final meals = mealProvider.meals;
 
     final filteredProducts = selectedCategory == null
         ? products
@@ -83,7 +101,7 @@ class _ListProductScreenState extends State<ListProductScreen> {
               ? TextField(
                   controller: _searchController,
                   autofocus: true,
-                  onChanged: _onSearchChanged,
+                  onSubmitted: _onSearchChanged,
                   textInputAction: TextInputAction.search,
                   style: const TextStyle(color: Colors.black),
                   decoration: const InputDecoration(
@@ -108,24 +126,42 @@ class _ListProductScreenState extends State<ListProductScreen> {
                 children: [
                   _buildCategoryChips(categoryProvider),
                   Expanded(
-                    child: filteredProducts.isEmpty
+                    child: (filteredProducts.isEmpty && meals.isEmpty)
                         ? const Center(child: Text("Produk tidak ditemukan"))
                         : ListView.builder(
-                            itemCount: filteredProducts.length,
+                            itemCount: filteredProducts.isNotEmpty
+                                ? filteredProducts.length
+                                : meals.length,
                             itemBuilder: (_, index) {
-                              final product = filteredProducts[index];
-                              return ProductCard(
-                                product: product,
-                                onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (_) =>
-                                          DetailScreen(product: product),
-                                    ),
-                                  );
-                                },
-                              );
+                              if (filteredProducts.isNotEmpty) {
+                                final product = filteredProducts[index];
+                                return ProductCard(
+                                  product: product,
+                                  onTap: () {},
+                                );
+                              } else {
+                                final Meal meal = meals[index];
+                                return ListTile(
+                                  leading: Image.network(
+                                    meal.thumb,
+                                    width: 50,
+                                    height: 50,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  title: Text(meal.name),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(meal.category ?? ''),
+                                      Text(
+                                          '⭐ ${meal.rating.toStringAsFixed(1)}'),
+                                      Text(
+                                          'Rp ${meal.price.toStringAsFixed(0)}'),
+                                    ],
+                                  ),
+                                );
+                              }
                             },
                           ),
                   ),

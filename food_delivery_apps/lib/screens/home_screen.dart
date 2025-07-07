@@ -36,12 +36,14 @@ class _HomeScreenState extends State<HomeScreen> {
     _adsController = PageController();
     _startAdsAutoScroll();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final productProvider = Provider.of<ProductProvider>(context, listen: false);
+      final productProvider =
+          Provider.of<ProductProvider>(context, listen: false);
       if (productProvider.products.isEmpty) {
         productProvider.fetchProducts();
       }
-      
-      final userProfile = Provider.of<UserProfileProvider>(context, listen: false);
+
+      final userProfile =
+          Provider.of<UserProfileProvider>(context, listen: false);
       userProfile.loadUserProfile();
     });
   }
@@ -83,64 +85,65 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: ListView(
                 children: [
-            const HeaderWidget(),
-            SizedBox(
-                width: double.infinity,
-                height: 180,
-                child: PageView.builder(
-                  controller: _adsController,
-                  itemCount: adsImages.length,
-                  itemBuilder: (context, index) {
-                    return Image.asset(
-                      adsImages[index],
-                      fit: BoxFit.cover,
+                  const HeaderWidget(),
+                  SizedBox(
                       width: double.infinity,
-                    );
-                  },
-                )),
-            const CategoryWidget(),
-            const SectionTitleWidget(title: "Trending"),
-            provider.loading
-                ? const Center(child: CircularProgressIndicator())
-                : HorizontalProductList(
-                    products: trending,
-                    onTap: (p) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => DetailScreen(product: p)),
-                    ),
-                  ),
-            const SectionTitleWidget(title: "Promos"),
-            provider.loading
-                ? const Center(child: CircularProgressIndicator())
-                : HorizontalProductList(
-                    products: promos,
-                    onTap: (p) => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (_) => DetailScreen(product: p)),
-                    ),
-                  ),
-            const SizedBox(height: 24),
-            const SectionTitleWidget(title: "Semua Menu"),
-            provider.loading
-                ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: products.length,
-                    itemBuilder: (_, i) => ProductCard(
-                      product: products[i],
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => DetailScreen(product: products[i]),
+                      height: 180,
+                      child: PageView.builder(
+                        controller: _adsController,
+                        itemCount: adsImages.length,
+                        itemBuilder: (context, index) {
+                          return Image.asset(
+                            adsImages[index],
+                            fit: BoxFit.cover,
+                            width: double.infinity,
+                          );
+                        },
+                      )),
+                  const CategoryWidget(),
+                  const SectionTitleWidget(title: "Trending"),
+                  provider.loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : HorizontalProductList(
+                          products: trending,
+                          onTap: (p) => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DetailScreen(product: p)),
                           ),
-                        );
-                      },
-                    ),
-                  ),
+                        ),
+                  const SectionTitleWidget(title: "Promos"),
+                  provider.loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : HorizontalProductList(
+                          products: promos,
+                          onTap: (p) => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (_) => DetailScreen(product: p)),
+                          ),
+                        ),
+                  const SizedBox(height: 24),
+                  const SectionTitleWidget(title: "Semua Menu"),
+                  provider.loading
+                      ? const Center(child: CircularProgressIndicator())
+                      : ListView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: products.length,
+                          itemBuilder: (_, i) => ProductCard(
+                            product: products[i],
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      DetailScreen(product: products[i]),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
                   const SizedBox(height: 32),
                 ],
               ),

@@ -3,6 +3,8 @@ import 'package:flutter/foundation.dart' show kIsWeb, debugPrint;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:foodexpress/providers/category_provider.dart';
 import 'package:foodexpress/providers/checkout_provider.dart';
+import 'package:foodexpress/providers/meal_provider.dart';
+
 import 'package:foodexpress/providers/search_provider_product.dart';
 import 'package:foodexpress/providers/user_profile_provider.dart';
 import 'package:foodexpress/screens/List_product_screen.dart';
@@ -24,13 +26,14 @@ import 'screens/splash_screen.dart';
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
-    
+
     if (kIsWeb) {
       await Firebase.initializeApp(
         options: const FirebaseOptions(
             apiKey: "AIzaSyBD_NgwsC2zuDU1r-ciZzKo7SsTKtDe4zM",
             authDomain: "foodexpress-5fe0a.firebaseapp.com",
-            databaseURL: "https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            databaseURL:
+                "https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app/",
             projectId: "foodexpress-5fe0a",
             storageBucket: "foodexpress-5fe0a.firebasestorage.app",
             messagingSenderId: "403992588206",
@@ -40,14 +43,14 @@ void main() async {
     } else {
       await Firebase.initializeApp();
     }
-    
+
     FirebaseService.optimizeFirebase();
-    
+
     await OfflineCacheService.init();
     debugPrint('cache service initialized');
-    
+
     _initializeProductsInBackground();
-    
+
     runApp(
       MultiProvider(
         providers: [
@@ -58,6 +61,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => SearchProductProvider()),
           ChangeNotifierProvider(create: (_) => CheckoutProvider()),
           ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+          ChangeNotifierProvider(create: (_) => MealProvider())
         ],
         child: MyApp(),
       ),
@@ -74,6 +78,7 @@ void main() async {
           ChangeNotifierProvider(create: (_) => SearchProductProvider()),
           ChangeNotifierProvider(create: (_) => CheckoutProvider()),
           ChangeNotifierProvider(create: (_) => UserProfileProvider()),
+          ChangeNotifierProvider(create: (_) => MealProvider())
         ],
         child: MyApp(),
       ),
@@ -89,7 +94,7 @@ void _initializeProductsInBackground() {
         debugPrint('gagal connect ke firebase');
         return;
       }
-      
+
       await FirebaseService().initializeProducts();
       debugPrint('berhasil initialize produk di background');
     } catch (e) {
