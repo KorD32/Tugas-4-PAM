@@ -17,7 +17,6 @@ class CartProvider with ChangeNotifier {
   bool get loading => _loading;
   bool get isInitialized => _initialized;
 
-  
   Future<void> loadCart() async {
     final userId = UserService.getCurrentUserId();
     if (userId == null) {
@@ -34,29 +33,29 @@ class CartProvider with ChangeNotifier {
     notifyListeners();
 
     try {
-      final cartItems = await _userService.getCartItems(userId)
-        .timeout(Duration(seconds: 10));
-      
+      final cartItems = await _userService
+          .getCartItems(userId)
+          .timeout(Duration(seconds: 10));
+
       _cart.clear();
       _selectedItems.clear();
 
       for (var item in cartItems) {
         final productIdValue = item['productId'];
         int? productId;
-        
+
         if (productIdValue is int) {
           productId = productIdValue;
         } else if (productIdValue is String) {
           productId = int.tryParse(productIdValue);
         }
-        
+
         if (productId != null) {
           _cart[productId] = item;
           _selectedItems[productId] = false;
-        } else {
-        }
+        } else {}
       }
-      
+
       _initialized = true;
       debugPrint('${_cart.length} items in cart');
     } catch (e) {
@@ -72,7 +71,6 @@ class CartProvider with ChangeNotifier {
     await loadCart();
   }
 
-  
   void listenToCartUpdates() {
     final userId = UserService.getCurrentUserId();
     if (userId == null) {
@@ -81,20 +79,21 @@ class CartProvider with ChangeNotifier {
 
     _cartSubscription?.cancel();
 
-    _cartSubscription = _userService.getCartItemsStream(userId).listen((cartItems) {
+    _cartSubscription =
+        _userService.getCartItemsStream(userId).listen((cartItems) {
       _cart.clear();
       _selectedItems.clear();
 
       for (var item in cartItems) {
         final productIdValue = item['productId'];
         int? productId;
-        
+
         if (productIdValue is int) {
           productId = productIdValue;
         } else if (productIdValue is String) {
           productId = int.tryParse(productIdValue);
         }
-        
+
         if (productId != null) {
           _cart[productId] = item;
           _selectedItems[productId] = false;
@@ -102,7 +101,7 @@ class CartProvider with ChangeNotifier {
           debugPrint('invalid: $productIdValue');
         }
       }
-      
+
       notifyListeners();
     });
   }
@@ -117,7 +116,6 @@ class CartProvider with ChangeNotifier {
         product: product,
         quantity: 1,
       );
-      
     } catch (e) {
       debugPrint('gagal tambah ke cart: $e');
     }
@@ -132,13 +130,13 @@ class CartProvider with ChangeNotifier {
       if (_cart.containsKey(productId)) {
         final quantityValue = _cart[productId]!['quantity'];
         int currentQuantity = 0;
-        
+
         if (quantityValue is int) {
           currentQuantity = quantityValue;
         } else if (quantityValue is String) {
           currentQuantity = int.tryParse(quantityValue) ?? 0;
         }
-        
+
         if (currentQuantity > 1) {
           await _userService.updateCartItemQuantity(
             userId: userId,
@@ -218,22 +216,22 @@ class CartProvider with ChangeNotifier {
       if (_selectedItems[productId] ?? false) {
         final priceValue = item['finalPrice'];
         final quantityValue = item['quantity'];
-        
+
         int price = 0;
         int quantity = 0;
-        
+
         if (priceValue is int) {
           price = priceValue;
         } else if (priceValue is String) {
           price = int.tryParse(priceValue) ?? 0;
         }
-        
+
         if (quantityValue is int) {
           quantity = quantityValue;
         } else if (quantityValue is String) {
           quantity = int.tryParse(quantityValue) ?? 0;
         }
-        
+
         total += price * quantity;
       }
     });
@@ -246,13 +244,13 @@ class CartProvider with ChangeNotifier {
       if (_selectedItems[productId] ?? false) {
         final quantityValue = item['quantity'];
         int quantity = 0;
-        
+
         if (quantityValue is int) {
           quantity = quantityValue;
         } else if (quantityValue is String) {
           quantity = int.tryParse(quantityValue) ?? 0;
         }
-        
+
         total += quantity;
       }
     });
@@ -280,47 +278,43 @@ class CartProvider with ChangeNotifier {
     }
   }
 
-  
   List<Map<String, dynamic>> getCartItemsForCheckout() {
     final selectedItems = getSelectedCartItems();
     return selectedItems.values.toList();
   }
 
-  
   int get cartItemCount {
     int count = 0;
     _cart.forEach((productId, item) {
       final quantityValue = item['quantity'];
       int quantity = 0;
-      
+
       if (quantityValue is int) {
         quantity = quantityValue;
       } else if (quantityValue is String) {
         quantity = int.tryParse(quantityValue) ?? 0;
       }
-      
+
       count += quantity;
     });
     return count;
   }
 
-  
   bool isInCart(int productId) {
     return _cart.containsKey(productId);
   }
 
-  
   int getProductQuantity(int productId) {
     final item = _cart[productId];
     if (item == null) return 0;
-    
+
     final quantityValue = item['quantity'];
     if (quantityValue is int) {
       return quantityValue;
     } else if (quantityValue is String) {
       return int.tryParse(quantityValue) ?? 0;
     }
-    
+
     return 0;
   }
 
@@ -329,64 +323,58 @@ class CartProvider with ChangeNotifier {
     if (userId == null) return;
 
     try {
-      
       if (_cart.containsKey(product.id)) {
-        
         final currentItem = _cart[product.id]!;
         final currentQuantityValue = currentItem['quantity'];
         int currentQuantity = 0;
-        
+
         if (currentQuantityValue is int) {
           currentQuantity = currentQuantityValue;
         } else if (currentQuantityValue is String) {
           currentQuantity = int.tryParse(currentQuantityValue) ?? 0;
         }
-        
+
         await _userService.updateCartItemQuantity(
           userId: userId,
           productId: product.id,
           quantity: currentQuantity + quantity,
         );
       } else {
-        
         await _userService.addToCart(
           userId: userId,
           product: product,
           quantity: quantity,
         );
       }
-      
     } catch (e) {
       debugPrint('gagal menambahkan cart dgn quantity: $e');
     }
   }
 
-  
   Future<void> clearCartData() async {
     final userId = UserService.getCurrentUserId();
-    
+
     _cart.clear();
     _selectedItems.clear();
     _initialized = false;
     _loading = false;
     _cartSubscription?.cancel();
     _cartSubscription = null;
-    
+
     if (userId != null) {
       await OfflineCacheService.clearCartCache(userId);
     }
-    
+
     notifyListeners();
   }
 
-  
   Future<void> incrementQuantity(int productId) async {
     final currentQuantity = getProductQuantity(productId);
     if (currentQuantity > 0) {
       await updateQuantity(productId, currentQuantity + 1);
     }
   }
-  
+
   Future<void> decrementQuantity(int productId) async {
     final currentQuantity = getProductQuantity(productId);
     if (currentQuantity > 1) {
@@ -395,7 +383,7 @@ class CartProvider with ChangeNotifier {
       await updateQuantity(productId, 0);
     }
   }
-  
+
   Future<void> removeProductFromCart(int productId) async {
     await updateQuantity(productId, 0);
   }

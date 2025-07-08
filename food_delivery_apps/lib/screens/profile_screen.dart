@@ -29,17 +29,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfile() async {
     final userProfile = context.read<UserProfileProvider>();
     final checkoutProvider = context.read<CheckoutProvider>();
-    
-    if (userProfile.userProfile == null) {
-      userProfile.loadUserProfile();
-      userProfile.listenToProfileUpdates();
-    }
-    
-    if (checkoutProvider.orderHistory.isEmpty) {
-      checkoutProvider.listenToOrderHistory();
-    }
-    await Future.delayed(Duration(milliseconds: 500));
-    
+
+    await userProfile.loadUserProfile();
+    userProfile.listenToProfileUpdates();
+
+    checkoutProvider.listenToOrderHistory();
+
+    await Future.delayed(const Duration(milliseconds: 500));
+
     if (mounted) {
       setState(() {
         _isLoading = false;
@@ -49,9 +46,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   String _formatRupiah(int amount) {
     return 'Rp ${amount.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    )}';
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        )}';
   }
 
   Widget _buildInfoCard({
@@ -178,7 +175,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
       body: Consumer<UserProfileProvider>(
         builder: (context, userProfile, child) {
-          if (userProfile.loading) {
+          if (userProfile.loading || _isLoading) {
             return const Center(
               child: CircularProgressIndicator(
                 color: Color(0xFF9038FF),
@@ -218,8 +215,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                       const SizedBox(height: 16),
                       Text(
-                        userProfile.username.isNotEmpty 
-                            ? userProfile.username 
+                        userProfile.username.isNotEmpty
+                            ? userProfile.username
                             : 'User',
                         style: const TextStyle(
                           fontSize: 28,
@@ -236,7 +233,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-                      
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -268,7 +264,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             LinearProgressIndicator(
                               value: userProfile.profileCompletionPercentage,
                               backgroundColor: Colors.white.withOpacity(0.3),
-                              valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: const AlwaysStoppedAnimation<Color>(
+                                  Colors.white),
                             ),
                           ],
                         ),
@@ -276,10 +273,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: Column(
@@ -294,37 +288,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
                       _buildInfoCard(
-                        title: 'Username',
-                        value: userProfile.username,
-                        icon: Icons.person_outline,
-                      ),
-
+                          title: 'Username',
+                          value: userProfile.username,
+                          icon: Icons.person_outline,
+                          iconColor: const Color(0xFF9038FF)),
                       _buildInfoCard(
-                        title: 'Nama Lengkap',
-                        value: userProfile.name,
-                        icon: Icons.badge_outlined,
-                        iconColor: Colors.blue,
-                      ),
-
+                          title: 'Nama Lengkap',
+                          value: userProfile.name,
+                          icon: Icons.badge_outlined,
+                          iconColor: const Color(0xFF9038FF)),
                       _buildInfoCard(
                         title: 'No Handphone',
                         value: userProfile.phone,
                         icon: Icons.phone_outlined,
-                        iconColor: Colors.green,
+                        iconColor: const Color(0xFF9038FF),
                       ),
-
                       _buildInfoCard(
-                        title: 'Alamat Pengiriman',
-                        value: userProfile.address,
-                        icon: Icons.location_on_outlined,
-                        iconColor: Colors.orange,
-                      ),
-
+                          title: 'Alamat Pengiriman',
+                          value: userProfile.address,
+                          icon: Icons.location_on_outlined,
+                          iconColor: const Color(0xFF9038FF)),
                       const SizedBox(height: 24),
-
-                      
                       Text(
                         'Statistik',
                         style: TextStyle(
@@ -334,7 +319,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
                       Consumer<CheckoutProvider>(
                         builder: (context, checkoutProvider, child) {
                           return Row(
@@ -343,23 +327,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 title: 'Pesanan',
                                 value: checkoutProvider.orderCount.toString(),
                                 icon: Icons.shopping_bag_outlined,
-                                color: const Color(0xFF9038FF),
+                                color: Color(0xFF9038FF),
                               ),
                               const SizedBox(width: 16),
                               _buildStatCard(
                                 title: 'Total Belanja',
-                                value: _formatRupiah(checkoutProvider.getTotalSpent()),
+                                value: _formatRupiah(
+                                    checkoutProvider.getTotalSpent()),
                                 icon: Icons.account_balance_wallet_outlined,
-                                color: Colors.green,
+                                color: Colors.black,
                               ),
                             ],
                           );
                         },
                       ),
-
                       const SizedBox(height: 32),
-
-                      
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -386,10 +368,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           },
                         ),
                       ),
-
                       const SizedBox(height: 16),
-
-                      
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton.icon(
@@ -412,19 +391,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           ),
                           onPressed: () async {
-                            
                             final shouldLogout = await showDialog<bool>(
                               context: context,
                               builder: (context) => AlertDialog(
                                 title: const Text('Konfirmasi Logout'),
-                                content: const Text('Apakah Anda yakin ingin keluar?'),
+                                content: const Text(
+                                    'Apakah Anda yakin ingin keluar?'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(context, false),
+                                    onPressed: () =>
+                                        Navigator.pop(context, false),
                                     child: const Text('Batal'),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () => Navigator.pop(context, true),
+                                    onPressed: () =>
+                                        Navigator.pop(context, true),
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.red,
                                       foregroundColor: Colors.white,
@@ -437,16 +418,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
                             if (shouldLogout == true) {
                               final navigator = Navigator.of(context);
-                              
-                              await AppAuthProvider.AuthProvider.logoutAndClearAllData(context);
-                              
+                              await AppAuthProvider.AuthProvider
+                                  .logoutAndClearAllData(context);
                               if (!mounted) return;
                               navigator.pushReplacementNamed('/login');
                             }
                           },
                         ),
                       ),
-
                       const SizedBox(height: 32),
                     ],
                   ),

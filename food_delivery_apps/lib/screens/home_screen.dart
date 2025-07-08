@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:foodexpress/screens/list_product_screen.dart';
 import 'package:provider/provider.dart';
 import '../providers/product_provider.dart';
 import '../providers/user_profile_provider.dart';
@@ -95,7 +96,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         itemBuilder: (context, index) {
                           return Image.asset(
                             adsImages[index],
-                            fit: BoxFit.cover,
+                            fit: BoxFit.contain,
                             width: double.infinity,
                           );
                         },
@@ -144,7 +145,39 @@ class _HomeScreenState extends State<HomeScreen> {
                             },
                           ),
                         ),
-                  const SizedBox(height: 32),
+                  SizedBox(
+                    height: 8,
+                  ),
+                  Column(
+                    children: [
+                      ElevatedButton(
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const ListProductScreen(),
+                            ),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(0xFF9038FF),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 32, vertical: 8),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                        child: const Text(
+                          'Lanjut',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                    ],
+                  )
                 ],
               ),
             ),

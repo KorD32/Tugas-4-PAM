@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/search_provider_product.dart';
 import '../providers/category_provider.dart';
 import '../providers/user_profile_provider.dart';
+import '../providers/meal_provider.dart';
 
 class HeaderWidget extends StatefulWidget {
   const HeaderWidget({super.key});
@@ -20,16 +21,24 @@ class _HeaderWidgetState extends State<HeaderWidget> {
     super.dispose();
   }
 
-  void _onSubmit(String value) {
+  void _onSubmit(String value) async {
     final trimmed = value.trim();
     if (trimmed.isEmpty) return;
 
     final searchProvider = context.read<SearchProductProvider>();
     final categoryProvider = context.read<CategoryProvider>();
+    final mealProvider = context.read<MealProvider>();
 
     categoryProvider.clearCategory();
 
     searchProvider.updateSearch(trimmed);
+    await searchProvider.fetchProducts();
+
+    if (searchProvider.products.isEmpty) {
+      await mealProvider.fetchMealsByName(trimmed);
+    } else {
+      mealProvider.clearMeals();
+    }
 
     if (mounted) {
       _controller.clear();
@@ -59,10 +68,10 @@ class _HeaderWidgetState extends State<HeaderWidget> {
               Expanded(
                 child: Consumer<UserProfileProvider>(
                   builder: (context, userProfile, child) {
-                    final username = userProfile.username.isNotEmpty 
-                        ? userProfile.username 
+                    final username = userProfile.username.isNotEmpty
+                        ? userProfile.username
                         : 'User';
-                    
+
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

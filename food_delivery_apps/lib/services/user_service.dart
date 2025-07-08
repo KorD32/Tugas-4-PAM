@@ -8,12 +8,12 @@ import 'offline_cache_service.dart';
 
 class UserService {
   static final DatabaseReference _database = FirebaseDatabase.instanceFor(
-    app: Firebase.app(),
-    databaseURL: 'https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app'
-  ).ref();
+          app: Firebase.app(),
+          databaseURL:
+              'https://foodexpress-5fe0a-default-rtdb.asia-southeast1.firebasedatabase.app')
+      .ref();
   static final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  
   Future<void> createUserProfile({
     required String userId,
     required String email,
@@ -33,7 +33,7 @@ class UserService {
         'address': address ?? '',
         'createdAt': DateTime.now().millisecondsSinceEpoch,
         'updatedAt': DateTime.now().millisecondsSinceEpoch,
-      }).timeout(Duration(seconds: 5)); 
+      }).timeout(Duration(seconds: 5));
     } catch (e) {
       throw Exception('gagal buat user: $e');
     }
@@ -41,46 +41,49 @@ class UserService {
 
   Future<Map<String, dynamic>?> getUserProfile(String userId) async {
     try {
-      
       final isOnline = await OfflineCacheService.isOnline();
-      
+
       if (!isOnline) {
-        final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+        final cachedProfile =
+            await OfflineCacheService.getCachedUserProfile(userId);
         if (cachedProfile != null) {
           return cachedProfile;
         } else {
           throw Exception('No internet dan cache');
         }
       }
-      
-      final snapshot = await _database.child('users').child(userId).get()
-        .timeout(Duration(seconds: 5)); 
-        
+
+      final snapshot = await _database
+          .child('users')
+          .child(userId)
+          .get()
+          .timeout(Duration(seconds: 5));
+
       if (snapshot.exists && snapshot.value != null) {
         final dynamic data = snapshot.value;
         if (data is Map<dynamic, dynamic>) {
           final profile = Map<String, dynamic>.from(data);
-          
+
           await OfflineCacheService.cacheUserProfile(userId, profile);
-          
+
           return profile;
         }
       }
-      
-      
-      final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+
+      final cachedProfile =
+          await OfflineCacheService.getCachedUserProfile(userId);
       if (cachedProfile != null) {
         return cachedProfile;
       }
-      
+
       return null;
     } catch (e) {
-      
-      final cachedProfile = await OfflineCacheService.getCachedUserProfile(userId);
+      final cachedProfile =
+          await OfflineCacheService.getCachedUserProfile(userId);
       if (cachedProfile != null) {
         return cachedProfile;
       }
-      
+
       throw Exception('gagal get user: $e');
     }
   }
@@ -110,7 +113,6 @@ class UserService {
     }
   }
 
-  
   Future<void> addToCart({
     required String userId,
     required Product product,
@@ -120,7 +122,7 @@ class UserService {
       final cartRef = _database.child('users').child(userId).child('cart');
       final cartsRef = _database.child('carts').child(userId);
       final productId = product.id.toString();
-      
+
       final cartData = {
         'productId': product.id,
         'name': product.name,
@@ -134,24 +136,23 @@ class UserService {
         'addedAt': DateTime.now().millisecondsSinceEpoch,
         'updatedAt': DateTime.now().millisecondsSinceEpoch,
       };
-      
+
       final snapshot = await cartRef.child(productId).get();
-      
+
       if (snapshot.exists) {
         final existingData = Map<String, dynamic>.from(snapshot.value as Map);
         final currentQuantity = existingData['quantity'] as int? ?? 0;
         final newQuantity = currentQuantity + quantity;
-        
+
         await cartRef.child(productId).update({
           'quantity': newQuantity,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         });
-        
+
         await cartsRef.child(productId).update({
           'quantity': newQuantity,
           'updatedAt': DateTime.now().millisecondsSinceEpoch,
         });
-        
       } else {
         await cartRef.child(productId).set(cartData);
         await cartsRef.child(productId).set(cartData);
@@ -167,7 +168,6 @@ class UserService {
     required int quantity,
   }) async {
     try {
-      
       if (quantity <= 0) {
         await removeFromCart(userId: userId, productId: productId);
         return;
@@ -184,13 +184,12 @@ class UserService {
           .child('cart')
           .child(productId.toString())
           .update(updateData);
-          
+
       await _database
           .child('carts')
           .child(userId)
           .child(productId.toString())
           .update(updateData);
-          
     } catch (e) {
       throw Exception('gagal update cart quantity: $e');
     }
@@ -201,20 +200,18 @@ class UserService {
     required int productId,
   }) async {
     try {
-      
       await _database
           .child('users')
           .child(userId)
           .child('cart')
           .child(productId.toString())
           .remove();
-          
+
       await _database
           .child('carts')
           .child(userId)
           .child(productId.toString())
           .remove();
-          
     } catch (e) {
       throw Exception('gagal hapus cart: $e');
     }
@@ -222,10 +219,8 @@ class UserService {
 
   Future<void> clearCart(String userId) async {
     try {
-      
       await _database.child('users').child(userId).child('cart').remove();
       await _database.child('carts').child(userId).remove();
-      
     } catch (e) {
       throw Exception('gagal clear cart: $e');
     }
@@ -233,9 +228,8 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getCartItems(String userId) async {
     try {
-
       final isOnline = await OfflineCacheService.isOnline();
-      
+
       if (!isOnline) {
         final cachedCart = await OfflineCacheService.getCachedCart(userId);
         if (cachedCart != null) {
@@ -245,25 +239,32 @@ class UserService {
           throw Exception('no internet dan cache');
         }
       }
-      
-      final cartSnapshot = await _database.child('carts').child(userId).get()
-        .timeout(Duration(seconds: 10));
-      
-      final userCartSnapshot = await _database.child('users').child(userId).child('cart').get()
-        .timeout(Duration(seconds: 10));
-      
+
+      final cartSnapshot = await _database
+          .child('carts')
+          .child(userId)
+          .get()
+          .timeout(Duration(seconds: 10));
+
+      final userCartSnapshot = await _database
+          .child('users')
+          .child(userId)
+          .child('cart')
+          .get()
+          .timeout(Duration(seconds: 10));
+
       List<Map<String, dynamic>> cartItems = [];
-      
+
       if (cartSnapshot.exists && cartSnapshot.value != null) {
         final dynamic data = cartSnapshot.value;
         cartItems.addAll(_processCartData(data));
       }
-      
+
       if (userCartSnapshot.exists && userCartSnapshot.value != null) {
         final dynamic data = userCartSnapshot.value;
         cartItems.addAll(_processCartData(data));
       }
-      
+
       final Map<int, Map<String, dynamic>> uniqueItems = {};
       for (final item in cartItems) {
         final productId = _extractProductId(item);
@@ -271,14 +272,13 @@ class UserService {
           uniqueItems[productId] = item;
         }
       }
-      
+
       final result = uniqueItems.values.toList();
       result.sort((a, b) => (_extractAddedAt(a)).compareTo(_extractAddedAt(b)));
-      
+
       await OfflineCacheService.cacheCart(userId, uniqueItems);
-      
+
       return result;
-      
     } catch (e) {
       final cachedCart = await OfflineCacheService.getCachedCart(userId);
       if (cachedCart != null) {
@@ -291,7 +291,7 @@ class UserService {
 
   List<Map<String, dynamic>> _processCartData(dynamic data) {
     List<Map<String, dynamic>> items = [];
-    
+
     if (data is Map<dynamic, dynamic>) {
       data.forEach((key, value) {
         if (value is Map<dynamic, dynamic>) {
@@ -309,7 +309,7 @@ class UserService {
         }
       }
     }
-    
+
     return items;
   }
 
@@ -333,29 +333,31 @@ class UserService {
     return 0;
   }
 
-  
   Stream<List<Map<String, dynamic>>> getCartItemsStream(String userId) {
-    
     final cartStream = _database.child('carts').child(userId).onValue;
-    
+
     return cartStream.asyncExpand((cartEvent) async* {
       try {
         List<Map<String, dynamic>> cartItems = [];
-        
+
         if (cartEvent.snapshot.exists && cartEvent.snapshot.value != null) {
           cartItems.addAll(_processCartData(cartEvent.snapshot.value));
         }
-        
+
         try {
-          final userCartSnapshot = await _database.child('users').child(userId).child('cart').get()
-            .timeout(Duration(seconds: 3));
+          final userCartSnapshot = await _database
+              .child('users')
+              .child(userId)
+              .child('cart')
+              .get()
+              .timeout(Duration(seconds: 3));
           if (userCartSnapshot.exists && userCartSnapshot.value != null) {
             cartItems.addAll(_processCartData(userCartSnapshot.value));
           }
         } catch (e) {
           debugPrint('err: $e');
         }
-        
+
         final Map<int, Map<String, dynamic>> uniqueItems = {};
         for (final item in cartItems) {
           final productId = _extractProductId(item);
@@ -363,19 +365,17 @@ class UserService {
             uniqueItems[productId] = item;
           }
         }
-        
+
         final result = uniqueItems.values.toList();
         result.sort((a, b) => _extractAddedAt(a).compareTo(_extractAddedAt(b)));
-        
+
         yield result;
-        
       } catch (e) {
         yield <Map<String, dynamic>>[];
       }
     });
   }
 
-  
   Future<void> createCheckout({
     required String userId,
     required Checkout checkout,
@@ -383,25 +383,31 @@ class UserService {
   }) async {
     try {
       final checkoutId = DateTime.now().millisecondsSinceEpoch.toString();
-      
-      
-      await _database.child('users').child(userId).child('orders').child(checkoutId).set({
+
+      await _database
+          .child('users')
+          .child(userId)
+          .child('orders')
+          .child(checkoutId)
+          .set({
         'id': checkoutId,
         'customerName': checkout.customerName,
         'customerPhone': checkout.customerPhone,
         'customerAddress': checkout.customerAddress,
         'paymentMethod': checkout.paymentMethod,
         'totalAmount': checkout.totalAmount,
-        'items': cartItems.map((item) => {
-          'productId': item['productId'],
-          'name': item['name'],
-          'price': item['price'],
-          'finalPrice': item['finalPrice'],
-          'quantity': item['quantity'],
-          'category': item['category'],
-          'shopName': item['shopName'],
-          'imageUrl': item['imageUrl'],
-        }).toList(),
+        'items': cartItems
+            .map((item) => {
+                  'productId': item['productId'],
+                  'name': item['name'],
+                  'price': item['price'],
+                  'finalPrice': item['finalPrice'],
+                  'quantity': item['quantity'],
+                  'category': item['category'],
+                  'shopName': item['shopName'],
+                  'imageUrl': item['imageUrl'],
+                })
+            .toList(),
         'status': 'pending',
         'createdAt': DateTime.now().millisecondsSinceEpoch,
         'updatedAt': DateTime.now().millisecondsSinceEpoch,
@@ -413,21 +419,23 @@ class UserService {
     }
   }
 
-  Future<void> removeCheckedOutItems(String userId, List<Map<String, dynamic>> checkedOutItems) async {
+  Future<void> removeCheckedOutItems(
+      String userId, List<Map<String, dynamic>> checkedOutItems) async {
     try {
-      
       for (final item in checkedOutItems) {
         final productId = _extractProductId(item);
         if (productId != null) {
           await removeFromCart(userId: userId, productId: productId);
-          
+
           try {
-            await _database.child('carts').child(userId).child(productId.toString()).remove();
-          } catch (e) {
-          }
+            await _database
+                .child('carts')
+                .child(userId)
+                .child(productId.toString())
+                .remove();
+          } catch (e) {}
         }
       }
-      
     } catch (e) {
       throw Exception('gagal hapus item checkout dari cart: $e');
     }
@@ -435,25 +443,26 @@ class UserService {
 
   Future<List<Map<String, dynamic>>> getOrderHistory(String userId) async {
     try {
-      
       final isOnline = await OfflineCacheService.isOnline();
       debugPrint('Online status: $isOnline');
-      
+
       if (!isOnline) {
-        final cachedOrders = await OfflineCacheService.getCachedOrderHistory(userId);
+        final cachedOrders =
+            await OfflineCacheService.getCachedOrderHistory(userId);
         if (cachedOrders != null) {
           return cachedOrders;
         } else {
           throw Exception('no internet connection dan cache');
         }
       }
-      
-      final snapshot = await _database.child('users').child(userId).child('orders').get();
-      
+
+      final snapshot =
+          await _database.child('users').child(userId).child('orders').get();
+
       if (snapshot.exists && snapshot.value != null) {
         final dynamic data = snapshot.value;
         List<Map<String, dynamic>> orders = [];
-        
+
         if (data is Map<dynamic, dynamic>) {
           data.forEach((key, value) {
             if (value is Map<dynamic, dynamic>) {
@@ -461,34 +470,39 @@ class UserService {
             }
           });
         }
-        
-        orders.sort((a, b) => (b['createdAt'] as int? ?? 0).compareTo(a['createdAt'] as int? ?? 0));
-        
+
+        orders.sort((a, b) => (b['createdAt'] as int? ?? 0)
+            .compareTo(a['createdAt'] as int? ?? 0));
+
         await OfflineCacheService.cacheOrderHistory(userId, orders);
-        
+
         return orders;
       }
-      
+
       await OfflineCacheService.cacheOrderHistory(userId, []);
       return [];
-      
     } catch (e) {
-      final cachedOrders = await OfflineCacheService.getCachedOrderHistory(userId);
+      final cachedOrders =
+          await OfflineCacheService.getCachedOrderHistory(userId);
       if (cachedOrders != null) {
         return cachedOrders;
       }
-      
+
       throw Exception('gagal buat order history: $e');
     }
   }
 
-  
   Stream<List<Map<String, dynamic>>> getOrderHistoryStream(String userId) {
-    return _database.child('users').child(userId).child('orders').onValue.map((event) {
+    return _database
+        .child('users')
+        .child(userId)
+        .child('orders')
+        .onValue
+        .map((event) {
       if (event.snapshot.exists && event.snapshot.value != null) {
         final dynamic data = event.snapshot.value;
         List<Map<String, dynamic>> orders = [];
-        
+
         if (data is Map<dynamic, dynamic>) {
           data.forEach((key, value) {
             if (value is Map<dynamic, dynamic>) {
@@ -496,8 +510,9 @@ class UserService {
             }
           });
         }
-        
-        orders.sort((a, b) => (b['createdAt'] as int? ?? 0).compareTo(a['createdAt'] as int? ?? 0));
+
+        orders.sort((a, b) => (b['createdAt'] as int? ?? 0)
+            .compareTo(a['createdAt'] as int? ?? 0));
         return orders;
       }
       return <Map<String, dynamic>>[];
@@ -524,12 +539,10 @@ class UserService {
     }
   }
 
-  
   static String? getCurrentUserId() {
     return _auth.currentUser?.uid;
   }
 
-  
   Stream<Map<String, dynamic>?> getUserProfileStream(String userId) {
     return _database.child('users').child(userId).onValue.map((event) {
       if (event.snapshot.exists && event.snapshot.value != null) {

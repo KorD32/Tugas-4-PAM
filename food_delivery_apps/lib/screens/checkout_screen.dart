@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodexpress/widgets/network_status_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -19,7 +20,7 @@ class CheckoutScreen extends StatefulWidget {
 
 class _CheckoutScreenState extends State<CheckoutScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   String _selectedPayment = 'Transfer Bank';
   bool _loading = false;
 
@@ -46,7 +47,6 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   int _calculateTotal() {
     int total = 0;
     widget.selectedItems.forEach((productId, item) {
-      
       final priceValue = item['finalPrice'];
       int price = 0;
       if (priceValue is int) {
@@ -54,7 +54,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       } else if (priceValue is String) {
         price = int.tryParse(priceValue) ?? 0;
       }
-      
+
       final quantityValue = item['quantity'];
       int quantity = 0;
       if (quantityValue is int) {
@@ -62,7 +62,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       } else if (quantityValue is String) {
         quantity = int.tryParse(quantityValue) ?? 0;
       }
-      
+
       total += price * quantity;
     });
     return total;
@@ -70,11 +70,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final formatRupiah = NumberFormat.currency(
-      locale: "id_ID", 
-      symbol: "Rp ", 
-      decimalDigits: 0
-    );
+    final formatRupiah =
+        NumberFormat.currency(locale: "id_ID", symbol: "Rp ", decimalDigits: 0);
     final total = _calculateTotal();
 
     return Scaffold(
@@ -82,7 +79,11 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         title: const Text('Checkout'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 1,
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          const OfflineIndicator(),
+        ],
       ),
       body: Form(
         key: _formKey,
@@ -94,32 +95,20 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    
                     _buildSectionTitle('Order Summary'),
                     _buildOrderSummary(formatRupiah),
-                    
                     const SizedBox(height: 24),
-                    
-                    
                     _buildSectionTitle('Informasi Pengiriman'),
                     _buildDeliveryInfo(),
-                    
                     const SizedBox(height: 24),
-                    
-                    
                     _buildSectionTitle('Payment Method'),
                     _buildPaymentMethods(),
-                    
                     const SizedBox(height: 24),
-                    
-                    
                     _buildTotalSection(formatRupiah, total),
                   ],
                 ),
               ),
             ),
-            
-            
             _buildCheckoutButton(total),
           ],
         ),
@@ -149,7 +138,7 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
             final item = entry.value;
             final quantity = item['quantity'] as int;
             final price = item['finalPrice'] as int;
-            
+
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: Row(
@@ -217,10 +206,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildDeliveryInfo() {
     return Consumer<UserProfileProvider>(
       builder: (context, userProfile, child) {
-        
-        bool isProfileComplete = userProfile.name.isNotEmpty && 
-                                userProfile.phone.isNotEmpty && 
-                                userProfile.address.isNotEmpty;
+        bool isProfileComplete = userProfile.name.isNotEmpty &&
+            userProfile.phone.isNotEmpty &&
+            userProfile.address.isNotEmpty;
 
         if (!isProfileComplete) {
           return Card(
@@ -253,7 +241,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: const Text('Lengkapi Profil', style: TextStyle(color: Colors.white)),
+                    child: const Text('Lengkapi Profil',
+                        style: TextStyle(color: Colors.white)),
                   ),
                 ],
               ),
@@ -271,11 +260,13 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                 const SizedBox(height: 12),
                 _buildInfoRow('No Handphone', userProfile.phone, Icons.phone),
                 const SizedBox(height: 12),
-                _buildInfoRow('Alamat Pengiriman', userProfile.address, Icons.location_on),
+                _buildInfoRow('Alamat Pengiriman', userProfile.address,
+                    Icons.location_on),
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    const Icon(Icons.info_outline, size: 16, color: Colors.blue),
+                    const Icon(Icons.info_outline,
+                        size: 16, color: Colors.blue),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -422,9 +413,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
   Future<void> _processCheckout() async {
     final userProfile = context.read<UserProfileProvider>();
-    
 
-    if (userProfile.name.isEmpty || userProfile.phone.isEmpty || userProfile.address.isEmpty) {
+    if (userProfile.name.isEmpty ||
+        userProfile.phone.isEmpty ||
+        userProfile.address.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Silakan lengkapi profil Anda terlebih dahulu.'),
@@ -440,9 +432,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
 
     try {
       final checkoutProvider = context.read<CheckoutProvider>();
-      
+
       final cartItems = widget.selectedItems.values.toList();
-      
+
       final success = await checkoutProvider.createCheckout(
         customerName: userProfile.name,
         customerPhone: userProfile.phone,
@@ -453,17 +445,17 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
       );
 
       if (success && mounted) {
-
         showDialog(
           context: context,
           barrierDismissible: false,
           builder: (context) => AlertDialog(
             title: const Text('Pesanan Berhasil Dibuat!'),
-            content: const Text('Pesanan Anda telah dibuat dan sedang diproses.'),
+            content:
+                const Text('Pesanan Anda telah dibuat dan sedang diproses.'),
             actions: [
               TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop(); 
+                  Navigator.of(context).pop();
                   Navigator.of(context).pop(true);
                 },
                 child: const Text('OK'),

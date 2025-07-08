@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:foodexpress/screens/detail_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/search_provider_product.dart';
@@ -78,9 +79,7 @@ class _ListProductScreenState extends State<ListProductScreen> {
     final mealProvider = context.watch<MealProvider>();
 
     final selectedCategory = categoryProvider.selectedCategory;
-
     final products = searchProvider.products;
-
     final meals = mealProvider.meals;
 
     final filteredProducts = selectedCategory == null
@@ -127,38 +126,85 @@ class _ListProductScreenState extends State<ListProductScreen> {
                   _buildCategoryChips(categoryProvider),
                   Expanded(
                     child: (filteredProducts.isEmpty && meals.isEmpty)
-                        ? const Center(child: Text("Produk tidak ditemukan"))
+                        ? const Center(
+                            child: Text(
+                              "Produk tidak ditemukan",
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          )
                         : ListView.builder(
                             itemCount: filteredProducts.isNotEmpty
                                 ? filteredProducts.length
-                                : meals.length,
+                                : meals.length + 1,
                             itemBuilder: (_, index) {
                               if (filteredProducts.isNotEmpty) {
                                 final product = filteredProducts[index];
                                 return ProductCard(
                                   product: product,
-                                  onTap: () {},
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (_) =>
+                                            DetailScreen(product: product),
+                                      ),
+                                    );
+                                  },
                                 );
                               } else {
-                                final Meal meal = meals[index];
-                                return ListTile(
-                                  leading: Image.network(
-                                    meal.thumb,
-                                    width: 50,
-                                    height: 50,
-                                    fit: BoxFit.cover,
-                                  ),
-                                  title: Text(meal.name),
-                                  subtitle: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(meal.category ?? ''),
-                                      Text(
-                                          '⭐ ${meal.rating.toStringAsFixed(1)}'),
-                                      Text(
-                                          'Rp ${meal.price.toStringAsFixed(0)}'),
-                                    ],
+                                if (index == 0) {
+                                  return Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16, vertical: 12),
+                                    child: Text(
+                                      "Rekomendasi lain",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.grey[800],
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                final Meal meal = meals[index - 1];
+                                return Card(
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 6),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12)),
+                                  child: ListTile(
+                                    contentPadding: const EdgeInsets.all(12),
+                                    leading: ClipRRect(
+                                      borderRadius: BorderRadius.circular(8),
+                                      child: Image.network(
+                                        meal.thumb,
+                                        width: 56,
+                                        height: 56,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
+                                    title: Text(
+                                      meal.name,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.w600),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(meal.category ?? '-',
+                                            style:
+                                                const TextStyle(fontSize: 12)),
+                                        Text(
+                                          '⭐ ${meal.rating.toStringAsFixed(1)} • Rp ${meal.price.toStringAsFixed(0)}',
+                                          style: const TextStyle(fontSize: 12),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 );
                               }
